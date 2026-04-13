@@ -1,5 +1,5 @@
-# NathWebSocket
-This system is the server of Shuho Sports Eve. Information Dashboard.
+# InfoBoard
+This system is the server of Shuho Sports Fes. Information Dashboard.
 
 ## Copyright
 Copyright (c) 2026 LingXuan-Li

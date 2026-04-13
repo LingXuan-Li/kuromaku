@@ -1,0 +1,11 @@
+# python仮想環境
+.venv/
+
+# VSCodeの設定ファイル
+.vscode/
+
+# Pythonのキャッシュファイル
+__pycache__/
+
+# 設定フォルダ
+.env/
