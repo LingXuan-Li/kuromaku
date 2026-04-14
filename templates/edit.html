@@ -3,11 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
-    <title>Dashboard Editer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/edit.css') }}">
+    <title>Dashboard Editor</title>
 </head>
 
 <body>
+    <h1>Dashboard Editor</h1>
+    <hr>
+
+    <div class="container">
+
+        <!-- ===================== Aコート ===================== -->
+        <h2>Aコート試合データ</h2>
+
+        <div class="data">
+            <span class="data-stress">NOW:</span>
+            <span class="data-value">
+                {% if matchA %}
+                    {{ matchA['Team-A'] }} vs {{ matchA['Team-B'] }} ({{ matchA['Game'] }})
+                {% else %}
+                    試合データなし
+                {% endif %}
+            </span>
+
+            <hr>
+
+            <span class="data-stress">NEXT:</span>
+            <span class="data-value">
+                {{ next_matchA }} {% if next_gameA %}({{ next_gameA }}){% endif %}
+            </span>
+
+            <hr>
+
+            <span class="data-stress">GATHERING:</span>
+            <span class="data-value">
+                {{ gathering_matchA }}
+            </span>
+        </div>
+
+        <!-- ===================== 編集フォーム ===================== -->
+        <div class="form">
+
+            <h3>進行コントロール（A/B/Cコート）</h3>
+
+            <!-- Aコート -->
+            <div class="control-box">
+                <label for="field_a">Aコート</label>
+
+                <button type="button" onclick="changeValue('field_a', -1)">－</button>
+
+                <input
+                    type="number"
+                    id="field_a"
+                    name="field_a"
+                    value="{{ values.field_a }}"
+                >
+
+                <button type="button" onclick="changeValue('field_a', 1)">＋</button>
+            </div>
+
+            <hr>
+
+            <!-- Bコート -->
+            <div class="control-box">
+                <label for="field_b">Bコート</label>
+
+                <button type="button" onclick="changeValue('field_b', -1)">－</button>
+
+                <input
+                    type="number"
+                    id="field_b"
+                    name="field_b"
+                    value="{{ values.field_b }}"
+                >
+
+                <button type="button" onclick="changeValue('field_b', 1)">＋</button>
+            </div>
+
+            <hr>
+
+            <!-- Cコート -->
+            <div class="control-box">
+                <label for="field_c">Cコート</label>
+
+                <button type="button" onclick="changeValue('field_c', -1)">－</button>
+
+                <input
+                    type="number"
+                    id="field_c"
+                    name="field_c"
+                    value="{{ values.field_c }}"
+                >
+
+                <button type="button" onclick="changeValue('field_c', 1)">＋</button>
+            </div>
+
+            <hr>
+
+            <!-- 保存 -->
+            <form method="POST">
+                <input type="hidden" id="hidden_field_a" name="field_a">
+                <input type="hidden" id="hidden_field_b" name="field_b">
+                <input type="hidden" id="hidden_field_c" name="field_c">
+
+                <button type="submit" onclick="syncValues()">保存</button>
+            </form>
+
+        </div>
+    </div>
+
+    <!-- ===================== JS ===================== -->
+    <script>
+        function changeValue(id, delta) {
+            const input = document.getElementById(id);
+            input.value = parseInt(input.value || 0) + delta;
+        }
+
+        function syncValues() {
+            document.getElementById("hidden_field_a").value = document.getElementById("field_a").value;
+            document.getElementById("hidden_field_b").value = document.getElementById("field_b").value;
+            document.getElementById("hidden_field_c").value = document.getElementById("field_c").value;
+        }
+    </script>
 
 </body>
 </html>
