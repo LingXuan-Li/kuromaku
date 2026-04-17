@@ -41,6 +41,62 @@
             </span>
         </div>
 
+        <!-- ===================== Bコート ===================== -->
+        <h2>Bコート試合データ</h2>
+
+        <div class="data">
+            <span class="data-stress">NOW:</span>
+            <span class="data-value">
+                {% if matchA %}
+                    {{ matchB['Team-A'] }} vs {{ matchB['Team-B'] }} ({{ matchB['Game'] }})
+                {% else %}
+                    試合データなし
+                {% endif %}
+            </span>
+
+            <hr>
+
+            <span class="data-stress">NEXT:</span>
+            <span class="data-value">
+                {{ next_matchB }} {% if next_gameB %}({{ next_gameB }}){% endif %}
+            </span>
+
+            <hr>
+
+            <span class="data-stress">GATHERING:</span>
+            <span class="data-value">
+                {{ gathering_matchB }}
+            </span>
+        </div>
+        
+        <!-- ===================== Cコート ===================== -->
+        <h2>Cコート試合データ</h2>
+
+        <div class="data">
+            <span class="data-stress">NOW:</span>
+            <span class="data-value">
+                {% if matchA %}
+                    {{ matchC['Team-A'] }} vs {{ matchC['Team-B'] }} ({{ matchC['Game'] }})
+                {% else %}
+                    試合データなし
+                {% endif %}
+            </span>
+
+            <hr>
+
+            <span class="data-stress">NEXT:</span>
+            <span class="data-value">
+                {{ next_matchC }} {% if next_gameC %}({{ next_gameC }}){% endif %}
+            </span>
+
+            <hr>
+
+            <span class="data-stress">GATHERING:</span>
+            <span class="data-value">
+                {{ gathering_matchC }}
+            </span>
+        </div>
+
         <!-- ===================== 編集フォーム ===================== -->
         <div class="form">
 

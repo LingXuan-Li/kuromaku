@@ -191,6 +191,6 @@ T_{d}(h)=\exp \left[{\frac {1}{c^{2}}}\int _{0}^{h}g(h')dh'\right]
 
 これで、終わり。また追加するかも、知らんけど。SEE YA！
 
-<p style="text-align: right;">LiXuan-Li</p>
+<p style="text-align: right;">LingXuan-Li</p>
 
 [![Twitter](https://img.shields.io/twitter/follow/RaccoonDog_329?style=social)](https://x.com/RaccoonDog_329)

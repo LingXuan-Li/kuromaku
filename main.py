@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for
 import os
 import json
 import csv
@@ -13,10 +13,7 @@ FIELDS = {
 
 JSON_PATH = "data/value.json"
 
-
-# =========================
 # JSON
-# =========================
 def load_values():
     try:
         with open(JSON_PATH, "r", encoding="utf-8") as f:
@@ -33,10 +30,7 @@ def save_values(values):
     with open(JSON_PATH, "w", encoding="utf-8") as f:
         json.dump(values, f, ensure_ascii=False, indent=2)
 
-
-# =========================
 # CSV
-# =========================
 def load_csv(path):
     try:
         with open(path, "r", encoding="utf-8") as f:
@@ -44,10 +38,7 @@ def load_csv(path):
     except FileNotFoundError:
         return []
 
-
-# =========================
-# 共通ロジック
-# =========================
+# フィールドごとのデータ取得
 def get_field_data(field_name):
     game_number = load_values().get(field_name, 0)
     matches = load_csv(FIELDS[field_name])
@@ -72,10 +63,6 @@ def get_field_data(field_name):
 
     return current, next_match, next_game, gathering
 
-
-# =========================
-# ダッシュボード
-# =========================
 @app.route("/")
 def dashboard():
     matchA, next_matchA, next_gameA, gatheringA = get_field_data("field_a")
@@ -97,39 +84,48 @@ def dashboard():
         matchC=matchC,
         next_matchC=next_matchC,
         next_gameC=next_gameC,
-        gathering_matchC=gatheringC,
+        gathering_matchC=gatheringC
     )
-
-
-# =========================
-# 編集画面（+/-対応）
-# =========================
-from flask import redirect, url_for  # ← これを先頭に追加
 
 @app.route("/edit", methods=["GET", "POST"])
 def edit():
     values = load_values()
+
+    matchA, next_matchA, next_gameA, gatheringA = get_field_data("field_a")
+    matchB, next_matchB, next_gameB, gatheringB = get_field_data("field_b")
+    matchC, next_matchC, next_gameC, gatheringC = get_field_data("field_c")
 
     if request.method == "POST":
         for k in FIELDS.keys():
             values[k] = int(request.form.get(k, 0))
 
         save_values(values)
-        return redirect(url_for("dashboard"))  # ← ここに入れる
+        return redirect(url_for("/edit"))
 
-    return render_template("edit.html", values=values)
+    return render_template(
+        "edit.html",
+        values=values,
+                           
+        matchA=matchA,
+        next_matchA=next_matchA,
+        next_gameA=next_gameA,
+        gathering_matchA=gatheringA,
 
+        matchB=matchB,
+        next_matchB=next_matchB,
+        next_gameB=next_gameB,
+        gathering_matchB=gatheringB,
 
-# =========================
-# 終了（開発用）
-# =========================
+        matchC=matchC,
+        next_matchC=next_matchC,
+        next_gameC=next_gameC,
+        gathering_matchC=gatheringC
+        )
+
+# 開発用
 @app.route("/exit")
 def exit_app():
     os._exit(0)
 
-
-# =========================
-# 起動
-# =========================
 if __name__ == "__main__":
     app.run(debug=True)
