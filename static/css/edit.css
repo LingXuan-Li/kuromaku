@@ -1,5 +1,5 @@
 /* =========
-     仮置き
+   ベース
    ========= */
 
 body {
@@ -22,7 +22,8 @@ h2 {
 }
 
 h3 {
-    margin-top: 20px;
+    margin-top: 0;
+    margin-bottom: 10px;
 }
 
 hr {
@@ -35,6 +36,10 @@ hr {
     max-width: 900px;
     margin: auto;
 }
+
+/* =========
+   データ表示
+   ========= */
 
 .data {
     background: #fff;
@@ -54,6 +59,24 @@ hr {
     font-size: 16px;
 }
 
+/* =========
+   プレビュー
+   ========= */
+
+#preview-area {
+    background: #eef3ff;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+#preview-area .data {
+    margin-top: 10px;
+}
+
+/* =========
+   フォーム
+   ========= */
+
 .form {
     background: #ffffff;
     margin-top: 40px;
@@ -62,10 +85,13 @@ hr {
     box-shadow: 0 4px 10px rgba(0,0,0,0.05);
 }
 
+/* =========
+   コントロール
+   ========= */
+
 .control-box {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: 10px;
 }
 
@@ -81,6 +107,11 @@ hr {
     font-size: 16px;
 }
 
+/* =========
+   ボタン
+   ========= */
+
+/* デフォルト（＋ボタン） */
 button {
     padding: 6px 12px;
     border: none;
@@ -96,13 +127,18 @@ button:hover {
     background: #357abd;
 }
 
-button:nth-of-type(1) {
+/* マイナスボタン（※nth-of-typeは危険なので修正） */
+.control-box button:first-of-type {
     background: #e94e4e;
 }
 
-button:nth-of-type(1):hover {
+.control-box button:first-of-type:hover {
     background: #c73d3d;
 }
+
+/* =========
+   保存ボタン
+   ========= */
 
 form button[type="submit"] {
     width: 100%;
@@ -114,4 +150,23 @@ form button[type="submit"] {
 
 form button[type="submit"]:hover {
     background: #1e8c4d;
+}
+
+/* =========
+   レスポンシブ
+   ========= */
+
+@media (max-width: 600px) {
+    .control-box {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .control-box input {
+        width: 100%;
+    }
+
+    button {
+        width: 100%;
+    }
 }

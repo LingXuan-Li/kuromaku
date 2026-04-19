@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Word風エディタ</title>
+
+<style>
+body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column; /* ← 縦積み */
+    font-family: sans-serif;
+    background: #1e1e1e;
+}
+
+/* エディタ（上） */
+#editor {
+    flex: 1;              /* ← 上半分 */
+    width: 100%;
+    padding: 15px;
+    font-family: monospace;
+    font-size: 15px;
+    background: #1e1e1e;
+    color: #d4d4d4;
+    border: none;
+    outline: none;
+    resize: none;
+    line-height: 1.5;
+    box-sizing: border-box;
+    border-bottom: 1px solid #333;
+}
+
+/* プレビュー（下） */
+#preview {
+    white-space: pre-wrap;
+    flex: 1;              /* ← 下半分 */
+    width: 100%;
+    padding: 15px;
+    overflow-y: auto;
+    background: #252526;   /* VSCodeっぽい暗色 */
+    color: #d4d4d4;
+    box-sizing: border-box;
+}
+
+
+/* 保存ボタン */
+#saveBtn {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    padding: 10px 14px;
+    background: #0078ff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+/* 右クリックメニュー（VSCode風ダーク） */
+.menu {
+    position: absolute;
+    display: none;
+    background: #2d2d2d;
+    border: 1px solid #444;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    min-width: 160px;
+    z-index: 9999;
+    color: white;
+}
+
+.menu div {
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.menu div:hover {
+    background: #3a3a3a;
+}
+</style>
+</head>
+
+<body>
+
+<textarea id="editor" spellcheck="false" placeholder="ここに入力"></textarea>
+<div id="preview"></div>
+
+<button id="saveBtn">保存</button>
+
+<!-- 右クリックメニュー -->
+<div id="menu" class="menu">
+    <div onclick="execCmd('bold')">赤</div>
+    <div onclick="execCmd('green')">緑</div>
+    <div onclick="execCmd('orange')">オレンジ</div>
+</div>
+
+<script>
+const editor = document.getElementById("editor");
+const preview = document.getElementById("preview");
+const menu = document.getElementById("menu");
+const saveBtn = document.getElementById("saveBtn");
+
+async function updatePreview() {
+    const res = await fetch("/api/message_preview", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ text: editor.value })
+    });
+
+    const data = await res.json();
+    preview.innerHTML = data.html || "";
+}
+
+editor.addEventListener("input", updatePreview);
+
+editor.addEventListener("contextmenu", (e) => {
+    e.preventDefault();
+
+    menu.style.left = e.pageX + "px";
+    menu.style.top = e.pageY + "px";
+    menu.style.display = "block";
+});
+
+
+document.addEventListener("click", () => {
+    menu.style.display = "none";
+});
+
+function execCmd(type) {
+    const start = editor.selectionStart;
+    const end = editor.selectionEnd;
+    const selected = editor.value.substring(start, end);
+
+    let result = selected;
+
+    if (type === "bold") {
+        result = "*" + selected + "*";
+    }
+
+    if (type === "green") {
+        result = "#" + selected + "#";
+    }
+
+    if (type === "orange") {
+        result = "@" + selected + "@";
+    }
+
+    editor.setRangeText(result, start, end, "end");
+    menu.style.display = "none";
+
+    editor.dispatchEvent(new Event("input"));
+}
+
+async function save() {
+    await fetch("/api/message_save", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ text: editor.value })
+    });
+
+    menu.style.display = "none";
+    alert("保存しました");
+}
+
+saveBtn.addEventListener("click", save);
+
+async function loadData() {
+    const res = await fetch("/api/message_load");
+    const data = await res.json();
+
+    editor.value = data.text || "";
+    updatePreview();
+}
+
+loadData();
+</script>
+
+</body>
+</html>

@@ -7,88 +7,105 @@
     <title>Sports Fes. Dashboard</title>
 </head>
 <body>
-    <div class="container">
-
-        {% if matchA %}
-        <div class="field">
-            <span class="field-name">Aコート</span>
-            <div class="match-info">
-                <div class="team">
-                    <span class="team-name-a">{{ matchA['Team-A'] }}</span>
-                </div>
-                <div class="vs">VS</div>
-                <div class="team">
-                    <span class="team-name-b">{{ matchA['Team-B'] }}</span>
-                </div>
-            </div>
-            <span class="game-name">{{ matchA['Game'] }}</span>
-            <div class="next-info">
-                <div class="next-game-info">
-                    <span class="next">NEXT</span><span class="next-team">{{ next_matchA }}</span>
-                    <span class="next-game-name">{{ next_gameA }}</span>
-                </div>
-                <div class="gathering-info">
-                    <span class="gathering">集合</span><span class="gathering-team">{{ gathering_matchA }}</span>
-                </div>
-            </div>
-        </div>
-        {% else %}
-        <p class="no-data">試合データがありません</p>
-        {% endif %}
-
-        {% if matchB %}
-        <div class="field">
-            <span class="field-name">Bコート</span>
-            <div class="match-info">
-                <div class="team">
-                    <span class="team-name-a">{{ matchB['Team-A'] }}</span>
-                </div>
-                <div class="vs">VS</div>
-                <div class="team">
-                    <span class="team-name-b">{{ matchB['Team-B'] }}</span>
-                </div>
-            </div>
-            <span class="game-name">{{ matchB['Game'] }}</span>
-            <div class="next-info">
-                <div class="next-game-info">
-                    <span class="next">NEXT</span><span class="next-team">{{ next_matchB }}</span>
-                    <span class="next-game-name">{{ next_gameB }}</span>
-                </div>
-                <div class="gathering-info">
-                    <span class="gathering">集合</span><span class="gathering-team">{{ gathering_matchB }}</span>
-                </div>
-            </div>
-        </div>
-        {% else %}
-        <p class="no-data">試合データがありません</p>
-        {% endif %}
-
-        {% if matchC %}
-        <div class="field">
-            <span class="field-name">Cコート</span>
-            <div class="match-info">
-                <div class="team">
-                    <span class="team-name-a">{{ matchC['Team-A'] }}</span>
-                </div>
-                <div class="vs">VS</div>
-                <div class="team">
-                    <span class="team-name-b">{{ matchC['Team-B'] }}</span>
-                </div>
-            </div>
-            <span class="game-name">{{ matchC['Game'] }}</span>
-            <div class="next-info">
-                <div class="next-game-info">
-                    <span class="next">NEXT</span><span class="next-team">{{ next_matchC }}</span>
-                    <span class="next-game-name">{{ next_gameC }}</span>
-                </div>
-                <div class="gathering-info">
-                    <span class="gathering">集合</span><span class="gathering-team">{{ gathering_matchC }}</span>
-                </div>
-            </div>
-        </div>
-        {% else %}
-        <p class="no-data">試合データがありません</p>
-        {% endif %}
+{% if matchA %}
+<div id="field-a">
+    <div class="field">
+        <span class="field-name">Aコート</span>
     </div>
+    <div class="match-info">
+        <div class="team-row">
+            <div class="team">
+                <span class="team-name-a">{{ matchA['Team-A'] }}</span>
+            </div>
+            <div class="vs">VS</div>
+            <div class="team">
+                <span class="team-name-b">{{ matchA['Team-B'] }}</span>
+            </div>
+        </div>
+        <div class="game-name">
+            <span class="game-name-text">{{ matchA['Game'] }}</span>
+        </div>
+    </div>
+    <div class="next-info">
+        <div class="next-game-info">
+            <span class="next">NEXT</span><span class="next-team">{{ next_matchA }}</span>
+            <span class="next-game-name">{{ next_gameA }}</span>
+        </div>
+        <div class="gathering-info">
+            <span class="gathering">集合</span><span class="gathering-team">{{ gathering_matchA }}</span>
+        </div>
+    </div>
+</div>
+{% else %}
+<p class="no-data">試合データがありません</p>
+{% endif %}
+
+
+{% if matchB %}
+<div id="field-b">
+    <div class="field">
+        <span class="field-name">Bコート</span>
+    </div>
+    <div class="match-info">
+        <div class="team-row">
+            <div class="team">
+                <span class="team-name-a">{{ matchB['Team-A'] }}</span>
+            </div>
+            <div class="vs">VS</div>
+            <div class="team">
+                <span class="team-name-b">{{ matchB['Team-B'] }}</span>
+            </div>
+        </div>
+        <div class="game-name">
+            <span class="game-name-text">{{ matchB['Game'] }}</span>
+        </div>
+    </div>
+    <div class="next-info">
+        <div class="next-game-info">
+            <span class="next">NEXT</span><span class="next-team">{{ next_matchB }}</span>
+            <span class="next-game-name">{{ next_gameB }}</span>
+        </div>
+        <div class="gathering-info">
+            <span class="gathering">集合</span><span class="gathering-team">{{ gathering_matchB }}</span>
+        </div>
+    </div>
+</div>
+{% else %}
+<p class="no-data">試合データがありません</p>
+{% endif %}
+
+
+{% if matchC %}
+<div id="field-c">
+    <div class="field">
+        <span class="field-name">Cコート</span>
+    </div>
+    <div class="match-info">
+        <div class="team-row">
+            <div class="team">
+                <span class="team-name-a">{{ matchC['Team-A'] }}</span>
+            </div>
+            <div class="vs">VS</div>
+            <div class="team">
+                <span class="team-name-b">{{ matchC['Team-B'] }}</span>
+            </div>
+        </div>
+        <div class="game-name">
+            <span class="game-name-text">{{ matchC['Game'] }}</span>
+        </div>
+    </div>
+    <div class="next-info">
+        <div class="next-game-info">
+            <span class="next">NEXT</span><span class="next-team">{{ next_matchC }}</span>
+            <span class="next-game-name">{{ next_gameC }}</span>
+        </div>
+        <div class="gathering-info">
+            <span class="gathering">集合</span><span class="gathering-team">{{ gathering_matchC }}</span>
+        </div>
+    </div>
+</div>
+{% else %}
+<p class="no-data">試合データがありません</p>
+{% endif %}
 </body>
 </html>
