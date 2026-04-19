@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 import os
 import json
 import csv
@@ -63,6 +63,7 @@ def get_field_data(field_name):
 
     return current, next_match, next_game, gathering
 
+# main root "Information Dashboard"
 @app.route("/")
 def dashboard():
     matchA, next_matchA, next_gameA, gatheringA = get_field_data("field_a")
@@ -87,6 +88,7 @@ def dashboard():
         gathering_matchC=gatheringC
     )
 
+# "Dashboard Editor"
 @app.route("/edit", methods=["GET", "POST"])
 def edit():
     values = load_values()
@@ -96,11 +98,12 @@ def edit():
     matchC, next_matchC, next_gameC, gatheringC = get_field_data("field_c")
 
     if request.method == "POST":
+        print("FORM:", request.form)
         for k in FIELDS.keys():
             values[k] = int(request.form.get(k, 0))
 
         save_values(values)
-        return redirect(url_for("/edit"))
+        return redirect(url_for("edit"))
 
     return render_template(
         "edit.html",
@@ -121,6 +124,55 @@ def edit():
         next_gameC=next_gameC,
         gathering_matchC=gatheringC
         )
+
+# Preview API
+def field_data_api(field_name, game_number=None):
+    if game_number is None:
+        game_number = load_values().get(field_name, 0)
+
+    matches = load_csv(FIELDS[field_name])
+
+    current = matches[game_number] if 0 <= game_number < len(matches) else None
+
+    # NOW
+    if current:
+        match_text = f"{current['Team-A']} vs {current['Team-B']} ({current['Game']})"
+    else:
+        match_text = "試合データなし"
+
+    # NEXT
+    if game_number + 1 < len(matches):
+        nxt = matches[game_number + 1]
+        next_match = f"{nxt['Team-A']} vs {nxt['Team-B']} ({nxt['Game']})"
+    else:
+        next_match = "次の試合はありません"
+
+    # GATHERING
+    if game_number + 2 < len(matches):
+        g = matches[game_number + 2]
+        gathering = f"{g['Team-A']} vs {g['Team-B']} ({g['Game']})"
+    else:
+        gathering = "集合する団体はありません"
+
+    return match_text, next_match, gathering
+
+@app.route("/api/preview", methods=["POST"])
+def api_preview():
+    data = request.get_json()
+    results = {}
+
+    for field in FIELDS:
+        game_number = int(data.get(field, 0))
+
+        match_text, next_match, gathering = field_data_api(field, game_number)
+
+        results[field] = {
+            "match": match_text,
+            "next_match": next_match,
+            "gathering": gathering
+        }
+
+    return jsonify(results)
 
 # 開発用
 @app.route("/exit")

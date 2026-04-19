@@ -9,3 +9,6 @@ __pycache__/
 
 # 設定フォルダ
 .env/
+
+# VSCode Files
+.vscode/
