@@ -135,15 +135,15 @@ function execCmd(type) {
     let result = selected;
 
     if (type === "bold") {
-        result = "*" + selected + "*";
+        result = "**" + selected + "**";
     }
 
     if (type === "green") {
-        result = "#" + selected + "#";
+        result = "$$" + selected + "$$";
     }
 
     if (type === "orange") {
-        result = "@" + selected + "@";
+        result = "@@" + selected + "@@";
     }
 
     editor.setRangeText(result, start, end, "end");
