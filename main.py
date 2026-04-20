@@ -126,7 +126,7 @@ def get_field_data(field_name):
     # GATHERING
     if game_number + 2 < len(matches):
         g = matches[game_number + 2]
-        gathering = f"{g['Team-A']} vs {g['Team-B']}"
+        gathering = f"{g['Team-A']} ・ {g['Team-B']}"
     else:
         gathering = "集合する団体はありません"
 
@@ -262,7 +262,7 @@ def field_data_api(field_name, game_number=None):
     # GATHERING
     if game_number + 2 < len(matches):
         g = matches[game_number + 2]
-        gathering = f"{g['Team-A']} vs {g['Team-B']} ({g['Game']})"
+        gathering = f"{g['Team-A']} ・ {g['Team-B']} ({g['Game']})"
     else:
         gathering = "集合する団体はありません"
 

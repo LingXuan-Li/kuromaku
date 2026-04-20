@@ -1,130 +1,165 @@
 /* ===== リセット ===== */
-
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  }
+}
 
 /* ===== 全体 ===== */
 body {
-font-family: "M PLUS 1p Black", sans-serif;
-background: #0f172a;
-color: white;
-height: 100vh;
-overflow: hidden;
+  font-family: "M PLUS 1p Black", sans-serif;
+  background: #0f172a;
+  color: white;
+  height: 100vh;
+  overflow: hidden;
 }
 
 /* ===== 各コート行 ===== */
 #field-a, #field-b, #field-c {
-display: flex;
-align-items: center;
-width: 100vw;
-height: 27vh;
-padding: 0 20px;
-border-bottom: 2px solid rgba(255,255,255,0.15);
+  display: flex;
+  align-items: center;
+  width: 100vw;
+  height: 27vh;
+  padding: 0 20px;
+  border-bottom: 2px solid rgba(255,255,255,0.15);
 }
 
 /* ===== 左：コート ===== */
 .field {
-width: 25%;
+  width: 25%;
 }
 
 .field-name {
-font-size: 3vw;
-font-weight: 900;
-background: linear-gradient(90deg, #1e293b, #334155);
-padding: 10px 20px;
-border-left: 8px solid #38bdf8;
+  font-size: 3vw;
+  font-weight: 900;
+  background: linear-gradient(90deg, #1e293b, #334155);
+  padding: 10px 20px;
+  border-left: 8px solid #38bdf8;
 }
 
 /* ===== 中央：試合情報 ===== */
 .match-info {
-width: 30%;
-display: flex;
-flex-direction: column;
-align-items: center;
-justify-content: center;
+  width: 30%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
 }
 
-/* 上段：チーム */
+/* ===== データなし状態 ===== */
+.no-data {
+  opacity: 0.6;
+}
+
+.no-data .vs {
+  visibility: hidden;
+}
+
+.no-data .game-name {
+  background: rgba(255,255,255,0.15);
+}
+
+.no-data .game-name-text {
+  font-size: 2vw;
+  font-weight: bold;
+}
+
+/* ===== 上段：チーム ===== */
 .team-row {
-display: flex;
-align-items: center;
-gap: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
 }
 
+/* チーム枠（崩れ防止） */
+.team {
+  min-width: 8vw;
+  text-align: center;
+}
+
+/* チーム名 */
 .team-name-a,
 .team-name-b {
-font-size: 4vw;
-font-weight: 900;
-letter-spacing: 0.05em;
-text-shadow: 0 0 15px rgba(255,255,255,0.25);
+  font-size: 4vw;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-shadow: 0 0 15px rgba(255,255,255,0.25);
+  white-space: nowrap;
 }
 
 /* VS */
 .vs {
-font-size: 2vw;
-opacity: 0.6;
+  font-size: 2vw;
+  opacity: 0.6;
 }
 
-/* 下段：ゲーム名 */
+/* ===== 下段：ゲーム名 ===== */
 .game-name {
-font-size: 1.6vw;
-margin-top: 8px;
-padding: 4px 12px;
-background: rgba(255,255,255,0.08);
-border-radius: 6px;
+  font-size: 1.6vw;
+  margin-top: 8px;
+  padding: 4px 12px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 6px;
 }
 
 /* ===== 右：NEXT / 集合 ===== */
 .next-info {
-width: 45%;
-display: flex;
-flex-direction: column;
-justify-content: center;
-gap: 10px;
+  width: 45%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
 }
 
 /* 行 */
 .next-game-info,
 .gathering-info {
-display: flex;
-align-items: center;
+  display: flex;
+  align-items: center;
 }
 
-/* ラベル */
+/* ラベル共通 */
 .next,
 .gathering {
-font-size: 1.4vw;
-font-weight: bold;
-padding: 4px 10px;
-margin-right: 8px;
-border-radius: 4px;
+  font-size: 1.4vw;
+  font-weight: bold;
+  padding: 4px 10px;
+  margin-right: 8px;
+  border-radius: 4px;
 }
 
 /* NEXT */
 .next {
-background: red;
-color: white;
+  background: red;
+  color: white;
 }
 
 /* 集合 */
 .gathering {
-background: aqua;
-color: white;
+  background: aqua;
+  color: white;
 }
 
 /* チーム名 */
 .next-team,
 .gathering-team {
-font-size: 2vw;
-font-weight: 900;
+  font-size: 2vw;
+  font-weight: 900;
+  min-width: 8vw; /* 崩れ防止 */
 }
 
 /* NEXTの試合名 */
 .next-game-name {
-font-size: 1.2vw;
-margin-left: 10px;
-opacity: 0.8;
+  font-size: 1.2vw;
+  margin-left: 10px;
+  opacity: 0.8;
+}
+
+/* ===== 空データ時の補助 ===== */
+.next-team:empty::after,
+.gathering-team:empty::after {
+  content: "---";
+  opacity: 0.6;
 }
