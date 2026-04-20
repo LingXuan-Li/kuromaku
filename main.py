@@ -117,7 +117,7 @@ def get_field_data(field_name):
     # NEXT
     if game_number + 1 < len(matches):
         nxt = matches[game_number + 1]
-        next_match = f"{nxt['Team-A']} vs {nxt['Team-B']}"
+        next_match = f"{nxt['Team-X']} vs {nxt['Team-Y']}"
         next_game = nxt["Game"]
     else:
         next_match = "次の試合はありません"
@@ -126,7 +126,7 @@ def get_field_data(field_name):
     # GATHERING
     if game_number + 2 < len(matches):
         g = matches[game_number + 2]
-        gathering = f"{g['Team-A']} ・ {g['Team-B']}"
+        gathering = f"{g['Team-X']} ・ {g['Team-Y']}"
     else:
         gathering = "集合する団体はありません"
 
@@ -135,10 +135,8 @@ def get_field_data(field_name):
 def message_parse(text: str) -> str:
     # RED
     text = re.sub(r'\*\*(.*?)\*\*', r'<span style="color: red;">\1</span>', text)
-
     # GREEN
     text = re.sub(r'\$\$(.*?)\$\$', r'<span style="color: forestgreen;">\1</span>', text)
-
     # ORANGE
     text = re.sub(r'\@\@(.*?)\@\@', r'<span style="color: orange;">\1</span>', text)
 
@@ -147,27 +145,43 @@ def message_parse(text: str) -> str:
 # main root "Information Dashboard"
 @app.route("/")
 def dashboard():
-    matchA, next_matchA, next_gameA, gatheringA = get_field_data("field_a")
-    matchB, next_matchB, next_gameB, gatheringB = get_field_data("field_b")
-    matchC, next_matchC, next_gameC, gatheringC = get_field_data("field_c")
+    matchA, _, _, _ = get_field_data("field_a")
+    matchB, _, _, _ = get_field_data("field_b")
+    matchC, _, _, _ = get_field_data("field_c")
+    return render_template("dashboard.html", matchA=matchA, matchB=matchB, matchC=matchC)
 
-    return render_template(
-        "dashboard.html",
-        matchA=matchA,
-        next_matchA=next_matchA,
-        next_gameA=next_gameA,
-        gathering_matchA=gatheringA,
-
-        matchB=matchB,
-        next_matchB=next_matchB,
-        next_gameB=next_gameB,
-        gathering_matchB=gatheringB,
-
-        matchC=matchC,
-        next_matchC=next_matchC,
-        next_gameC=next_gameC,
-        gathering_matchC=gatheringC
-    )
+# Dashboard API
+@app.route("/api/dashboard")
+def dashboard_api():
+    matchA, next_matchA, next_gameA, gathering_matchA = get_field_data("field_a")
+    matchB, next_matchB, next_gameB, gathering_matchB = get_field_data("field_b")
+    matchC, next_matchC, next_gameC, gathering_matchC = get_field_data("field_c")
+    return jsonify({
+        "A": {
+            "teamX": matchA['Team-X'] if matchA else None,
+            "teamY": matchA['Team-Y'] if matchA else None,
+            "game": matchA['Game'] if matchA else None,
+            "next": next_matchA,
+            "next_game": next_gameA,
+            "gathering": gathering_matchA
+        },
+        "B": {
+            "teamX": matchB['Team-X'] if matchB else None,
+            "teamY": matchB['Team-Y'] if matchB else None,
+            "game": matchB['Game'] if matchB else None,
+            "next": next_matchB,
+            "next_game": next_gameB,
+            "gathering": gathering_matchB
+        },
+        "C": {
+            "teamX": matchC['Team-X'] if matchC else None,
+            "teamY": matchC['Team-Y'] if matchC else None,
+            "game": matchC['Game'] if matchC else None,
+            "next": next_matchC,
+            "next_game": next_gameC,
+            "gathering": gathering_matchC
+        }
+    })
 
 # "Dashboard Editor"
 @app.route("/edit", methods=["GET", "POST"])
@@ -248,21 +262,21 @@ def field_data_api(field_name, game_number=None):
 
     # NOW
     if current:
-        match_text = f"{current['Team-A']} vs {current['Team-B']} ({current['Game']})"
+        match_text = f"{current['Team-X']} vs {current['Team-Y']} ({current['Game']})"
     else:
         match_text = "試合データなし"
 
     # NEXT
     if game_number + 1 < len(matches):
         nxt = matches[game_number + 1]
-        next_match = f"{nxt['Team-A']} vs {nxt['Team-B']} ({nxt['Game']})"
+        next_match = f"{nxt['Team-X']} vs {nxt['Team-Y']} ({nxt['Game']})"
     else:
         next_match = "次の試合はありません"
 
     # GATHERING
     if game_number + 2 < len(matches):
         g = matches[game_number + 2]
-        gathering = f"{g['Team-A']} ・ {g['Team-B']} ({g['Game']})"
+        gathering = f"{g['Team-X']} ・ {g['Team-Y']} ({g['Game']})"
     else:
         gathering = "集合する団体はありません"
 

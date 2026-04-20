@@ -7,51 +7,40 @@
     <title>Sports Fes. Dashboard</title>
 </head>
 <body>
+
 <div id="field-a">
   <div class="field">
     <span class="field-name">Aコート</span>
   </div>
 
-  <div class="match-info {{ 'no-data' if not matchA }}">
+  <div class="match-info">
     <div class="team-row">
       <div class="team">
-        <span class="team-name-a">
-          {{ matchA['Team-A'] if matchA else '---' }}
-        </span>
+        <span id="a-teamX" class="team-name-x">---</span>
       </div>
 
       <div class="vs">VS</div>
 
       <div class="team">
-        <span class="team-name-b">
-          {{ matchA['Team-B'] if matchA else '---' }}
-        </span>
+        <span id="a-teamY" class="team-name-y">---</span>
       </div>
     </div>
 
     <div class="game-name">
-      <span class="game-name-text">
-        {{ matchA['Game'] if matchA else '---' }}
-      </span>
+      <span id="a-game" class="game-name-text">---</span>
     </div>
   </div>
 
   <div class="next-info">
     <div class="next-game-info">
-      <span class="next">NEXT</span>
-      <span class="next-team">
-        {{ next_matchA if next_matchA else '---' }}
-      </span>
-      <span class="next-game-name">
-        {{ next_gameA if next_gameA else '---' }}
-      </span>
+      <span class="next">NEXT!</span>
+      <span id="a-next" class="next-team">---</span>
+      <span id="a-next-game" class="next-game-name">---</span>
     </div>
 
     <div class="gathering-info">
-      <span class="gathering">集合</span>
-      <span class="gathering-team">
-        {{ gathering_matchA if gathering_matchA else '---' }}
-      </span>
+      <span class="gathering">集合!!</span>
+      <span id="a-gathering" class="gathering-team">---</span>
     </div>
   </div>
 </div>
@@ -61,46 +50,34 @@
     <span class="field-name">Bコート</span>
   </div>
 
-  <div class="match-info {{ 'no-data' if not matchB }}">
+  <div class="match-info">
     <div class="team-row">
       <div class="team">
-        <span class="team-name-a">
-          {{ matchB['Team-A'] if matchB else '---' }}
-        </span>
+        <span id="b-teamX" class="team-name-x">---</span>
       </div>
 
       <div class="vs">VS</div>
 
       <div class="team">
-        <span class="team-name-b">
-          {{ matchB['Team-B'] if matchB else '---' }}
-        </span>
+        <span id="b-teamY" class="team-name-y">---</span>
       </div>
     </div>
 
     <div class="game-name">
-      <span class="game-name-text">
-        {{ matchB['Game'] if matchB else '---' }}
-      </span>
+      <span id="b-game" class="game-name-text">---</span>
     </div>
   </div>
 
   <div class="next-info">
     <div class="next-game-info">
-      <span class="next">NEXT</span>
-      <span class="next-team">
-        {{ next_matchB if next_matchB else '---' }}
-      </span>
-      <span class="next-game-name">
-        {{ next_gameB if next_gameB else '---' }}
-      </span>
+      <span class="next">NEXT!</span>
+      <span id="b-next" class="next-team">---</span>
+      <span id="b-next-game" class="next-game-name">---</span>
     </div>
 
     <div class="gathering-info">
-      <span class="gathering">集合</span>
-      <span class="gathering-team">
-        {{ gathering_matchB if gathering_matchB else '---' }}
-      </span>
+      <span class="gathering">集合!!</span>
+      <span id="b-gathering" class="gathering-team">---</span>
     </div>
   </div>
 </div>
@@ -110,48 +87,38 @@
     <span class="field-name">Cコート</span>
   </div>
 
-  <div class="match-info {{ 'no-data' if not matchC }}">
+  <div class="match-info">
     <div class="team-row">
       <div class="team">
-        <span class="team-name-a">
-          {{ matchC['Team-A'] if matchC else '---' }}
-        </span>
+        <span id="c-teamX" class="team-name-x">---</span>
       </div>
 
       <div class="vs">VS</div>
 
       <div class="team">
-        <span class="team-name-b">
-          {{ matchC['Team-B'] if matchC else '---' }}
-        </span>
+        <span id="c-teamY" class="team-name-y">---</span>
       </div>
     </div>
 
     <div class="game-name">
-      <span class="game-name-text">
-        {{ matchC['Game'] if matchC else '---' }}
-      </span>
+      <span id="c-game" class="game-name-text">---</span>
     </div>
   </div>
 
   <div class="next-info">
     <div class="next-game-info">
-      <span class="next">NEXT</span>
-      <span class="next-team">
-        {{ next_matchC if next_matchC else '---' }}
-      </span>
-      <span class="next-game-name">
-        {{ next_gameC if next_gameC else '---' }}
-      </span>
+      <span class="next">NEXT!</span>
+      <span id="c-next" class="next-team">---</span>
+      <span id="c-next-game" class="next-game-name">---</span>
     </div>
 
     <div class="gathering-info">
-      <span class="gathering">集合</span>
-      <span class="gathering-team">
-        {{ gathering_matchC if gathering_matchC else '---' }}
-      </span>
+      <span class="gathering">集合!!</span>
+      <span id="c-gathering" class="gathering-team">---</span>
     </div>
   </div>
 </div>
+
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 </body>
 </html>
