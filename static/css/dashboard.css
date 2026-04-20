@@ -163,3 +163,77 @@ body {
   content: "---";
   opacity: 0.6;
 }
+
+/* test */
+
+
+/* ===== インフォメーションバー ===== */
+.info-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100vw;
+  height: 19vh;
+  display: flex;
+  background: linear-gradient(90deg, #020617, #0f172a);
+  border-top: 3px solid rgba(255,255,255,0.2);
+  z-index: 999;
+}
+
+/* ===== 左：スクロール ===== */
+.info-scroll {
+  width: calc(100vw - 15vw); /* ← テーマ分引く */
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+/* テキスト */
+.info-text {
+  white-space: nowrap;
+  padding-left: 100%;
+  font-size: 4vw;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-shadow: 0 0 15px rgba(255,255,255,0.25);
+  animation: none;
+}
+
+/* JS用 */
+.scroll-once {
+  animation-name: scroll-left;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+  animation-duration: 15s;
+  font-family: "Zen Old Mincho Black", "Noto Serif JP", serif;
+}
+
+/* ===== 右：テーマ（15vw固定） ===== */
+.info-theme {
+  width: 15vw;
+  min-width: 15vw;
+  max-width: 15vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2vw;
+  font-weight: 900;
+  text-align: center;
+  background: rgba(255,255,255,0.05);
+  border-left: 3px solid #38bdf8;
+}
+
+/* アニメーション */
+@keyframes scroll-left {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+/* ===== 下余白 ===== */
+body {
+  padding-bottom: 19vh;
+}

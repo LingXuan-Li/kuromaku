@@ -43,3 +43,40 @@ function updateField(prefix, d) {
 
 setInterval(fetchDashboard, 3000);
 fetchDashboard();
+
+// ===== インフォメーションバー制御 =====
+const infoText = document.querySelector(".info-text");
+
+// 初回スタート
+startInfoScroll();
+
+function startInfoScroll() {
+    infoText.classList.remove("scroll-once");
+
+    // 再描画トリガー（これないと再スタートしない）
+    void infoText.offsetWidth;
+
+    // 文字数で速度調整（おすすめ）
+    const textLength = infoText.textContent.length;
+    const duration = 15;
+    infoText.style.animationDuration = duration + "s";
+
+    infoText.classList.add("scroll-once");
+}
+
+// 流れ終わったら更新
+infoText.addEventListener("animationend", async () => {
+    try {
+        const res = await fetch("/api/info"); // ← インフォ専用API
+        const data = await res.json();
+
+        // テキスト更新
+        infoText.innerHTML = data.message || "お知らせはありません";
+
+    } catch (e) {
+        console.error("info更新失敗", e);
+    }
+
+    // 再スタート
+    startInfoScroll();
+});

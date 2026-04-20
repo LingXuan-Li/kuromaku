@@ -7,6 +7,8 @@ import re
 
 app = Flask(__name__)
 
+MESSAGE_INDEX = 0
+
 FIELDS_CSV = {
     "field_a": "data/field_a.csv",
     "field_b": "data/field_b.csv",
@@ -181,6 +183,22 @@ def dashboard_api():
             "next_game": next_gameC,
             "gathering": gathering_matchC
         }
+    })
+
+# Info API
+@app.route("/api/info")
+def get_info():
+    global MESSAGE_INDEX
+    messages = json.loads(load_message())
+    if not messages:
+        message = ["塩分補給・水分補給を忘れずに！"]
+    else:
+        message = messages[MESSAGE_INDEX]
+        message = message_parse(message)
+
+    MESSAGE_INDEX = (MESSAGE_INDEX + 1) % len(messages)
+    return jsonify({
+        "message": message
     })
 
 # "Dashboard Editor"
