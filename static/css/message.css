@@ -1,0 +1,72 @@
+body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column; /* ← 縦積み */
+    font-family: sans-serif;
+    background: #1e1e1e;
+}
+
+/* エディタ（上） */
+#editor {
+    flex: 1;              /* ← 上半分 */
+    width: 100%;
+    padding: 15px;
+    font-family: monospace;
+    font-size: 15px;
+    background: #1e1e1e;
+    color: #d4d4d4;
+    border: none;
+    outline: none;
+    resize: none;
+    line-height: 1.5;
+    box-sizing: border-box;
+    border-bottom: 1px solid #333;
+}
+
+/* プレビュー（下） */
+#preview {
+    white-space: pre-wrap;
+    flex: 1;              /* ← 下半分 */
+    width: 100%;
+    padding: 15px;
+    overflow-y: auto;
+    background: #252526;   /* VSCodeっぽい暗色 */
+    color: #d4d4d4;
+    box-sizing: border-box;
+}
+
+
+/* 保存ボタン */
+#saveBtn {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    padding: 10px 14px;
+    background: #0078ff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+/* 右クリックメニュー（VSCode風ダーク） */
+.menu {
+    position: absolute;
+    display: none;
+    background: #2d2d2d;
+    border: 1px solid #444;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    min-width: 160px;
+    z-index: 9999;
+    color: white;
+}
+
+.menu div {
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.menu div:hover {
+    background: #3a3a3a;
+}
