@@ -211,12 +211,16 @@ def edit():
     matchC, next_matchC, next_gameC, gatheringC = get_field_data("field_c")
 
     if request.method == "POST":
-        print("FORM:", request.form)
+        data = request.get_json(silent=True) or {}
+
         for k in FIELDS_CSV.keys():
-            values[k] = int(request.form.get(k, 0))
+            try:
+                values[k] = int(data.get(k, 0))
+            except ValueError:
+                values[k] = 0
 
         save_values(values)
-        return redirect(url_for("edit"))
+        return jsonify({"status": "ok"})
 
     return render_template(
         "edit.html",
