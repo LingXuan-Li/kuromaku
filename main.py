@@ -9,125 +9,176 @@ app = Flask(__name__)
 
 MESSAGE_INDEX = 0
 
-FIELDS_CSV = {
-    "field_a": "data/field_a.csv",
-    "field_b": "data/field_b.csv",
-    "field_c": "data/field_c.csv",
+FIELDS_TABLE = {
+    "field_a": "field_a",
+    "field_b": "field_b",
+    "field_c": "field_c",
 }
 
-FIELDS_DB = {
-    "field_a": int,
-    "field_b": int,
-    "field_c": int
-}
+csv_files = [
+    "data/field_a.csv",
+    "data/field_b.csv",
+    "data/field_c.csv"
+]
 
 DB_PATH = "data/values.db"
 
-# SQLite
-def get_conn():
-    return sqlite3.connect(DB_PATH)
+# DBヘルパー（統一コア）
+def execute_db(fn):
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.row_factory = sqlite3.Row
+        return fn(conn)
 
 # DB初期化
 def init_db():
-    with get_conn() as conn:
-        # 値保存用テーブル
+    def _job(conn):
+        # 値テーブル
         conn.execute("""
         CREATE TABLE IF NOT EXISTS values_table (
             key TEXT PRIMARY KEY,
             value INTEGER
         )
         """)
-        # 初期値入力
-        for k in FIELDS_DB.keys():
+
+        for k in FIELDS_TABLE.keys():
             conn.execute(
                 "INSERT OR IGNORE INTO values_table (key, value) VALUES (?, ?)",
                 (k, 0)
             )
-        conn.commit()
 
-        # メッセージ用テーブル
+        # メッセージテーブル
         conn.execute("""
         CREATE TABLE IF NOT EXISTS message (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             message TEXT
         )
         """)
-        conn.commit()
-
-# メッセージ保存
-def save_message(data):
-    messages = json.loads(data)
-
-    with get_conn() as conn:
-        # 既存データ削除
-        conn.execute("DELETE FROM message")
-
-        # 新規データ保存
-        for msg in messages:
-            if not msg.strip():
-                continue
-            conn.execute(
-                "INSERT INTO message (message) VALUES (?)",
-                (msg,)
-            )
 
         conn.commit()
 
-def load_message():
-    with get_conn() as conn:
-        cursor = conn.execute(
-            "SELECT message FROM message ORDER BY id ASC"
-        )
-        rows = cursor.fetchall()
+    execute_db(_job)
 
-        messages = [row[0] for row in rows]
-        return json.dumps(messages, ensure_ascii=False)
-
+# values_table
 def load_values():
-    with get_conn() as conn:
-        cursor = conn.execute("SELECT key, value FROM values_table")
-        return {k: v for k, v in cursor.fetchall()}
+    def _job(conn):
+        cur = conn.execute("SELECT key, value FROM values_table")
+        return {k: v for k, v in cur.fetchall()}
+
+    return execute_db(_job)
+
 
 def save_values(values):
-    with get_conn() as conn:
+    def _job(conn):
         for k, v in values.items():
-            conn.execute(
-                """
+            conn.execute("""
                 INSERT INTO values_table (key, value)
                 VALUES (?, ?)
                 ON CONFLICT(key) DO UPDATE SET value=excluded.value
-                """,
-                (k, v)
-            )
+            """, (k, v))
         conn.commit()
 
-# CSV
-def load_csv(path):
-    try:
-        with open(path, "r", encoding="utf-8") as f:
-            return list(csv.DictReader(f))
-    except FileNotFoundError:
-        return []
+    execute_db(_job)
 
-# フィールドごとのデータ取得
+# メッセージ
+def save_message(data):
+    messages = json.loads(data)
+
+    def _job(conn):
+        conn.execute("DELETE FROM message")
+
+        for msg in messages:
+            if msg.strip():
+                conn.execute(
+                    "INSERT INTO message (message) VALUES (?)",
+                    (msg,)
+                )
+
+        conn.commit()
+
+    execute_db(_job)
+
+
+def load_message():
+    def _job(conn):
+        cur = conn.execute("SELECT message FROM message ORDER BY id ASC")
+        return json.dumps([r[0] for r in cur.fetchall()], ensure_ascii=False)
+
+    return execute_db(_job)
+
+# CSV → DB
+def load_csv_to_db(csv_files):
+
+    def _job(conn):
+        cur = conn.cursor()
+
+        for csv_file in csv_files:
+
+            if not os.path.exists(csv_file):
+                continue
+
+            table_name = os.path.splitext(os.path.basename(csv_file))[0]
+
+            with open(csv_file, newline="", encoding="utf-8") as f:
+                reader = csv.reader(f)
+                header = next(reader)
+
+                columns_sql = ", ".join([f'"{col}" TEXT' for col in header])
+
+                cur.execute(f'DROP TABLE IF EXISTS "{table_name}"')
+                cur.execute(f'CREATE TABLE "{table_name}" ({columns_sql})')
+
+                placeholders = ", ".join(["?"] * len(header))
+                rows = list(reader)
+
+                cur.executemany(
+                    f'INSERT INTO "{table_name}" VALUES ({placeholders})',
+                    rows
+                )
+
+            conn.commit()
+
+    execute_db(_job)
+
+# ゲームデータ用DB取得
+def get_row(table, offset):
+    def _job(conn):
+        cur = conn.cursor()
+        cur.execute(f'''
+            SELECT * FROM "{table}"
+            LIMIT 1 OFFSET ?
+        ''', (offset,))
+        return cur.fetchone()
+
+    return execute_db(_job)
+
+# ゲームデータ取得ロジック
 def get_field_data(field_name):
+
+    table = FIELDS_TABLE[field_name]
     game_number = load_values().get(field_name, 0)
-    matches = load_csv(FIELDS_CSV[field_name])
 
-    current = matches[game_number] if 0 <= game_number < len(matches) else None
+    current_row = get_row(table, game_number)
 
-    # NEXT
-    if game_number + 1 < len(matches):
-        nxt = matches[game_number + 1]
+    if current_row:
+        current = {
+            "label": current_row["label"],
+            "Team-X": current_row["Team-X"],
+            "Team-Y": current_row["Team-Y"],
+            "Game": current_row["Game"],
+        }
+    else:
+        current = None
+
+    nxt = get_row(table, game_number + 1)
+    if nxt:
         next_match = f"{nxt['Team-X']} vs {nxt['Team-Y']}"
         next_game = nxt["Game"]
     else:
         next_match = "次の試合はありません"
         next_game = None
 
-    # GATHERING
-    if game_number + 2 < len(matches):
-        g = matches[game_number + 2]
+    g = get_row(table, game_number + 2)
+    if g:
         gathering = f"{g['Team-X']} ・ {g['Team-Y']}"
     else:
         gathering = "集合する団体はありません"
@@ -213,7 +264,7 @@ def edit():
     if request.method == "POST":
         data = request.get_json(silent=True) or {}
 
-        for k in FIELDS_CSV.keys():
+        for k in FIELDS_TABLE.keys():
             try:
                 values[k] = int(data.get(k, 0))
             except ValueError:
@@ -278,9 +329,19 @@ def field_data_api(field_name, game_number=None):
     if game_number is None:
         game_number = load_values().get(field_name, 0)
 
-    matches = load_csv(FIELDS_CSV[field_name])
+    table = FIELDS_TABLE[field_name]
 
-    current = matches[game_number] if 0 <= game_number < len(matches) else None
+    current_row = get_row(table, game_number)
+
+    if current_row:
+        current = {
+            "label": current_row["label"],
+            "Team-X": current_row["Team-X"],
+            "Team-Y": current_row["Team-Y"],
+            "Game": current_row["Game"],
+        }
+    else:
+        current = None
 
     # NOW
     if current:
@@ -288,28 +349,28 @@ def field_data_api(field_name, game_number=None):
     else:
         match_text = "試合データなし"
 
-    # NEXT
-    if game_number + 1 < len(matches):
-        nxt = matches[game_number + 1]
-        next_match = f"{nxt['Team-X']} vs {nxt['Team-Y']} ({nxt['Game']})"
+    nxt = get_row(table, game_number + 1)
+    if nxt:
+        next_match = f"{nxt['Team-X']} vs {nxt['Team-Y']}"
+        next_game = nxt["Game"]
     else:
         next_match = "次の試合はありません"
+        next_game = None
 
-    # GATHERING
-    if game_number + 2 < len(matches):
-        g = matches[game_number + 2]
-        gathering = f"{g['Team-X']} ・ {g['Team-Y']} ({g['Game']})"
+    g = get_row(table, game_number + 2)
+    if g:
+        gathering = f"{g['Team-X']} ・ {g['Team-Y']}"
     else:
         gathering = "集合する団体はありません"
 
-    return match_text, next_match, gathering
+    return match_text, next_game, gathering
 
 @app.route("/api/preview", methods=["POST"])
 def api_preview():
     data = request.get_json()
     results = {}
 
-    for field in FIELDS_CSV:
+    for field in FIELDS_TABLE:
         game_number = int(data.get(field, 0))
 
         match_text, next_match, gathering = field_data_api(field, game_number)
@@ -335,4 +396,5 @@ def check():
 
 if __name__ == "__main__":
     init_db()
+    load_csv_to_db(csv_files)
     app.run(debug=True)

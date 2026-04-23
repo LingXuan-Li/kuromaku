@@ -3,7 +3,135 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>InfoBoard - NOTE</title>
-    <link rel="stylesheet" href="static/css/note.css">
+<style>
+/* ベース設定 */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans JP", sans-serif;
+    line-height: 1.8;
+    background-color: #f5f7fa;
+    color: #333;
+    margin: 0;
+}
+
+/* メインコンテンツ */
+main {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 40px;
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* 見出し */
+h1 {
+    font-size: 1.8rem;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+h2 {
+    margin-top: 40px;
+    font-size: 1.4rem;
+    border-left: 5px solid #4a90e2;
+    padding-left: 10px;
+}
+
+h3 {
+    margin-top: 30px;
+    font-size: 1.2rem;
+    color: #555;
+}
+
+/* 段落 */
+p {
+    margin: 16px 0;
+}
+
+/* 強調テキスト */
+.title-emphasis {
+    font-size: 1.2rem;
+    color: #2c3e50;
+    background: #eef4ff;
+    padding: 10px;
+    border-left: 4px solid #4a90e2;
+}
+
+/* details（折りたたみ） */
+details {
+    margin: 20px 0;
+    padding: 15px;
+    background: #fafafa;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+}
+
+summary {
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* コードブロック */
+pre {
+    background: #2d2d2d;
+    color: #f8f8f2;
+    padding: 15px;
+    overflow-x: auto;
+    border-radius: 6px;
+}
+
+code {
+    font-family: Consolas, Monaco, monospace;
+}
+
+.sobigtext {
+    font-size: 30px;
+}
+
+/* 引用風ボックス（元の.quote-1を整える） */
+.quote-1 {
+    border-left: 5px solid #4a90e2;
+    background: #f9fbff;
+    padding: 20px;
+    margin: 30px 0;
+    border-radius: 6px;
+}
+
+/* フッター */
+footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 0.9rem;
+    color: #777;
+}
+
+/* リンク */
+a {
+    color: #4a90e2;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* 著者署名 */
+.author-signature {
+    text-align: right;
+    margin-top: 40px;
+    font-style: italic;
+    color: #555;
+}
+
+/* スマホ対応 */
+@media (max-width: 600px) {
+    main {
+        margin: 10px;
+        padding: 20px;
+    }
+}
+</style>
 </head>
 <body>
     <main>
@@ -25,11 +153,11 @@
 
         <p>一番は、MICROSOFT EXCELから変換・エクスポートが早いから</p>
 
-        <p>また、SQLiteなどのDBよりも、読取のみなのでそこは過剰だと考えてる</p>
+        <p><s>また、SQLiteなどのDBよりも、読取のみなのでそこは過剰だと考えてる</s>CSVをDB化する方法で使う予定...。</p>
 
         <h2>JSONの話</h2>
 
-        <p>ここは、正直SQLiteでもよかったと思う</p>
+        <p><s>ここは、正直SQLiteでもよかったと思う</s>SQLiteにしました。そして、CSVもSQLiteにする予定。</p>
 
         <p>ただ、私自身はみんながアプリポチポチして編集して衝突するよりも、裏方部屋で1台のlaptopで変更する方が、実行委員会側の連携がしやすいかなと</p>
 
@@ -45,16 +173,16 @@
 
         <h3>WIKIとフロントエンド</h3>
 
-        <p style="font-size: 30px;">こっから自分語り多め、見なくてもいいよ</p>
+        <p class="sobigtext">こっから自分語り多め、見なくてもいいよ</p>
 
 <details>
 <summary>展開</summary>
 
-えーっと、本当に思ったことを書くところだから適当に書くね
+<p>えーっと、本当に思ったことを書くところだから適当に書くね</p>
 
-元々、私はエンジニア部（現：班）に入ったときは、半ば入れさせられたんだよ先輩に
+<p>元々、私はエンジニア部（現：班）に入ったときは、半ば入れさせられたんだよ先輩に</p>
 
-そん時は、あるWikiサイト（私のTwitterアカウント見ればわかる、好き嫌い激しいコンテンツだから見なくてもよし）にはまってて、そこはWiki Syntax（いわゆる、拡張マークダウン）があってそれで、HTML/CSS的なことをしていたんだよね。例として下のような感じ
+<p>そん時は、あるWikiサイト（私のTwitterアカウント見ればわかる、好き嫌い激しいコンテンツだから見なくてもよし）にはまってて、そこはWiki Syntax（いわゆる、拡張マークダウン）があってそれで、HTML/CSS的なことをしていたんだよね。例として下のような感じ</p>
 
 <pre><code>[[module CSS]]
 .quote-1 {
@@ -99,7 +227,7 @@ T_{d}(h)=\exp \left[{\frac {1}{c^{2}}}\int _{0}^{h}g(h')dh'\right]
 [[/div]]
 </code></pre>
 
-これがこうなる（数学数式はうまく反映できんかった）
+<p>これがこうなる（数学数式はうまく反映できんかった）</p>
 
 <style>
 .quote-1 {
@@ -121,15 +249,23 @@ T_{d}(h)=\exp \left[{\frac {1}{c^{2}}}\int _{0}^{h}g(h')dh'\right]
     margin: 0.5em
 }
 }
+
+.big_text {
+    font-size: 150%;
+}
+
+.center_text {
+    text-align: center;
+}
 </style>
 
 <div class="quote-1">
 
-  <p style="font-size: 150%; text-align: center;">付属資料: 物理学的基本知識</p>
+  <p class="big_text">付属資料: 物理学的基本知識</p>
 
   <hr>
 
-  <p style="font-size: 120%; text-align: center;"><strong><u>重力による時間の遅れ</u></strong></p>
+  <p class="center_text"><strong><u>重力による時間の遅れ</u></strong></p>
 
   <p>
     大きな質量を有する質量体から遠い時計は早く動き、質量体に近い時計は遅く動きます。
@@ -142,7 +278,7 @@ T_{d}(h)=\exp \left[{\frac {1}{c^{2}}}\int _{0}^{h}g(h')dh'\right]
     <i>T<sub>d</sub>(h)</i> は以下のように表すことができます。
   </p>
 
-  <p>
+  <p class="center_text">
     T<sub>d</sub>(h) = exp[(1 / c<sup>2</sup>) ∫<sub>0</sub><sup>h</sup> g(h')dh']
   </p>
 
@@ -150,7 +286,7 @@ T_{d}(h)=\exp \left[{\frac {1}{c^{2}}}\int _{0}^{h}g(h')dh'\right]
     平坦な時空におけるリンドラー座標を用いると、<i>g(h)</i> は以下のように表すことができます。
   </p>
 
-  <p>
+  <p class="center_text">
     g(h) = c<sup>2</sup> / (H + h)
   </p>
 
@@ -158,7 +294,7 @@ T_{d}(h)=\exp \left[{\frac {1}{c^{2}}}\int _{0}^{h}g(h')dh'\right]
     ここで、<i>H</i> は定数です。(1)と(2)から、<i>T<sub>d</sub>(h)</i> は以下のように導けます。
   </p>
 
-  <p>
+  <p class="center_text">
     T<sub>d</sub>(h) = e<sup>ln(H+h) − ln H</sup> = (H + h) / H
   </p>
 
