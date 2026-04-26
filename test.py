@@ -1,7 +1,9 @@
+from flask import Flask, render_template, request, jsonify
 import sqlite3
-import csv
 import os
-import json
+import csv
+
+app = Flask(__name__)
 
 DB_PATH = "data/data.db"
 
@@ -11,208 +13,151 @@ csv_files = [
     "data/field_c.csv"
 ]
 
-FIELDS_TABLE = {
-    "field_a": "field_a",
-    "field_b": "field_b",
-    "field_c": "field_c",
-}
-
-# DBヘルパー（統一コア）
+# =========================
+# DB共通処理
+# =========================
 def execute_db(fn):
     with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = sqlite3.Row
         return fn(conn)
 
+# =========================
 # DB初期化
+# =========================
 def init_db():
     def _job(conn):
-        # 値テーブル
         conn.execute("""
-        CREATE TABLE IF NOT EXISTS values_table (
-            key TEXT PRIMARY KEY,
-            value INTEGER
-        )
-        """)
-
-        for k in FIELDS_TABLE.keys():
-            conn.execute(
-                "INSERT OR IGNORE INTO values_table (key, value) VALUES (?, ?)",
-                (k, 0)
-            )
-
-        # メッセージテーブル
-        conn.execute("""
-        CREATE TABLE IF NOT EXISTS message (
+        CREATE TABLE IF NOT EXISTS games (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            message TEXT
+            label TEXT,
+            team_x TEXT,
+            team_y TEXT,
+            game TEXT,
+            col INTEGER,
+            row INTEGER,
+            status TEXT DEFAULT 'pending'
         )
+        """)
+
+        conn.execute("""
+        CREATE UNIQUE INDEX IF NOT EXISTS one_current_only
+        ON games(status)
+        WHERE status = 'current'
         """)
 
         conn.commit()
 
     execute_db(_job)
 
-# values_table
-def load_values():
-    def _job(conn):
-        cur = conn.execute("SELECT key, value FROM values_table")
-        return {k: v for k, v in cur.fetchall()}
-
-    return execute_db(_job)
-
-
-def save_values(values):
-    def _job(conn):
-        for k, v in values.items():
-            conn.execute("""
-                INSERT INTO values_table (key, value)
-                VALUES (?, ?)
-                ON CONFLICT(key) DO UPDATE SET value=excluded.value
-            """, (k, v))
-        conn.commit()
-
-    execute_db(_job)
-
-# メッセージ
-def save_message(data):
-    messages = json.loads(data)
-
-    def _job(conn):
-        conn.execute("DELETE FROM message")
-
-        for msg in messages:
-            if msg.strip():
-                conn.execute(
-                    "INSERT INTO message (message) VALUES (?)",
-                    (msg,)
-                )
-
-        conn.commit()
-
-    execute_db(_job)
-
-
-def load_message():
-    def _job(conn):
-        cur = conn.execute("SELECT message FROM message ORDER BY id ASC")
-        return json.dumps([r[0] for r in cur.fetchall()], ensure_ascii=False)
-
-    return execute_db(_job)
-
-# CSV → DB
-def load_csv_to_db(csv_files):
-
+# =========================
+# CSV初期投入
+# =========================
+def init_games_from_csv():
     def _job(conn):
         cur = conn.cursor()
+
+        cur.execute("SELECT COUNT(*) FROM games")
+        if cur.fetchone()[0] > 0:
+            return
+
+        col_index = 0
 
         for csv_file in csv_files:
-
             if not os.path.exists(csv_file):
-                print(f"❌ 見つかりません: {csv_file}")
                 continue
 
-            table_name = os.path.splitext(os.path.basename(csv_file))[0]
-            print(f"\n📥 処理中: {csv_file} → テーブル {table_name}")
-
             with open(csv_file, newline="", encoding="utf-8") as f:
-                reader = csv.reader(f)
-                header = next(reader)
+                reader = csv.DictReader(f)
 
-                columns_sql = ", ".join([f'"{col}" TEXT' for col in header])
+                for row_index, row in enumerate(reader):
+                    cur.execute("""
+                        INSERT INTO games
+                        (label, team_x, team_y, game, col, row, status)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                    """, (
+                        row.get("label", ""),
+                        row.get("Team-X", ""),
+                        row.get("Team-Y", ""),
+                        row.get("Game", ""),
+                        col_index,
+                        row_index,
+                        "pending"
+                    ))
 
-                cur.execute(f'DROP TABLE IF EXISTS "{table_name}"')
-                cur.execute(f'CREATE TABLE "{table_name}" ({columns_sql})')
+            col_index += 1
 
-                placeholders = ", ".join(["?"] * len(header))
-                rows = list(reader)
-
-                cur.executemany(
-                    f'INSERT INTO "{table_name}" VALUES ({placeholders})',
-                    rows
-                )
-
-            conn.commit()
-            print(f"✅ 保存完了: {table_name}")
+        conn.commit()
 
     execute_db(_job)
 
-# ゲームデータ用DB取得
-def get_row(table, offset):
+# =========================
+# 画面
+# =========================
+@app.route("/")
+def index():
     def _job(conn):
-        cur = conn.cursor()
-        cur.execute(f'''
-            SELECT * FROM "{table}"
-            LIMIT 1 OFFSET ?
-        ''', (offset,))
-        return cur.fetchone()
+        cur = conn.execute("""
+            SELECT * FROM games
+            ORDER BY col, row
+        """)
+        return [dict(r) for r in cur.fetchall()]
 
-    return execute_db(_job)
+    return render_template("edit_table.html", data=execute_db(_job))
 
-# ゲームデータ取得ロジック
-def get_field_data(field_name):
+# =========================
+# 保存API
+# =========================
+@app.route("/api/reorder", methods=["POST"])
+def reorder():
+    items = request.get_json()["result"]
 
-    table = FIELDS_TABLE[field_name]
-    game_number = load_values().get(field_name, 0)
+    def _job(conn):
+        conn.execute("BEGIN")
 
-    current_row = get_row(table, game_number)
+        # currentリセット
+        conn.execute("UPDATE games SET status='pending' WHERE status='current'")
 
-    if current_row:
-        current = {
-            "label": current_row["label"],
-            "Team-X": current_row["Team-X"],
-            "Team-Y": current_row["Team-Y"],
-            "Game": current_row["Game"],
-        }
-    else:
-        current = None
+        for item in items:
 
-    nxt = get_row(table, game_number + 1)
-    if nxt:
-        next_match = f"{nxt['Team-X']} vs {nxt['Team-Y']}"
-        next_game = nxt["Game"]
-    else:
-        next_match = "次の試合はありません"
-        next_game = None
+            if item["status"] == "current":
 
-    g = get_row(table, game_number + 2)
-    if g:
-        gathering = f"{g['Team-X']} ・ {g['Team-Y']}"
-    else:
-        gathering = "集合する団体はありません"
+                # 前 → done
+                conn.execute("""
+                    UPDATE games
+                    SET status='done'
+                    WHERE col=? AND row < ?
+                """, (item["col"], item["row"]))
 
-    return current, next_match, next_game, gathering
+                # 後 → pending
+                conn.execute("""
+                    UPDATE games
+                    SET status='pending'
+                    WHERE col=? AND row > ?
+                """, (item["col"], item["row"]))
 
-def main():
-    print("===== DB初期化 =====")
-    init_db()
+            conn.execute("""
+                UPDATE games
+                SET col=?, row=?, status=?
+                WHERE id=?
+            """, (
+                item["col"],
+                item["row"],
+                item["status"],
+                item["id"]
+            ))
 
-    print("\n===== CSV読み込み =====")
-    load_csv_to_db(csv_files)
+        conn.commit()
 
-    print("\n===== values確認 =====")
-    values = load_values()
-    print(values)
+    execute_db(_job)
+    return jsonify({"status": "ok"})
 
-    print("\n===== メッセージ保存テスト =====")
-    sample_messages = json.dumps([
-        "テスト1",
-        "テスト2",
-        "テスト3"
-    ], ensure_ascii=False)
-
-    save_message(sample_messages)
-    print(load_message())
-
-    print("\n===== fieldデータ取得テスト =====")
-    for field in FIELDS_TABLE.keys():
-        print(f"\n--- {field} ---")
-        current, next_match, next_game, gathering = get_field_data(field)
-
-        print("current:", current)
-        print("next_match:", next_match)
-        print("next_game:", next_game)
-        print("gathering:", gathering)
-
-
+# =========================
+# 起動
+# =========================
 if __name__ == "__main__":
-    main()
+    os.makedirs("data", exist_ok=True)
+
+    init_db()
+    init_games_from_csv()
+
+    app.run(debug=True)

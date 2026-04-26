@@ -241,13 +241,15 @@ def dashboard_api():
 def get_info():
     global MESSAGE_INDEX
     messages = json.loads(load_message())
+
     if not messages:
-        message = ["塩分補給・水分補給を忘れずに！"]
-    else:
-        message = messages[MESSAGE_INDEX]
-        message = message_parse(message)
+        messages = ["塩分補給・水分補給を忘れずに！"]
+
+    message = messages[MESSAGE_INDEX]
+    message = message_parse(message)
 
     MESSAGE_INDEX = (MESSAGE_INDEX + 1) % len(messages)
+
     return jsonify({
         "message": message
     })
