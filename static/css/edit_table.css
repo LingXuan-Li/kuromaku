@@ -1,0 +1,94 @@
+body {
+  margin: 0;
+  background: #F8F6F0;
+  font-family: sans-serif;
+  color: #333;
+}
+
+h1 {
+  text-align: center;
+  color: #4A6FA5;
+}
+
+.container {
+  display: flex;
+  gap: 16px;
+  max-width: 1100px;
+  margin: auto;
+}
+
+.column {
+  flex: 1;
+  background: #fff;
+  padding: 12px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.list {
+  min-height: 300px;
+}
+
+.cell {
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  transition: all 0.2s ease;
+}
+
+.pending { background:#EEF4FF; border-left:4px solid #AFCBFF; }
+.current { background:#DCE8FF; border-left:6px solid #6B9CFF; font-weight:bold; transform:scale(1.02); }
+.done { background:#E5ECF6; opacity:0.6; text-decoration:line-through; }
+
+.handle { cursor:grab; color:#6B9CFF; }
+
+#dirtyBanner {
+  display:none;
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  background:#FACC15;
+  padding:12px 16px;
+  border-radius:10px;
+  font-weight:bold;
+}
+
+#saveBtn {
+  display:block;
+  margin:20px auto;
+  padding:10px 24px;
+  background:#6B9CFF;
+  color:white;
+  border:none;
+  border-radius:8px;
+}
+
+/* =========================
+   Undo UI
+========================= */
+#undoPanel {
+  text-align:center;
+  margin:10px;
+}
+
+#undoBtn {
+  padding:8px 18px;
+  border:none;
+  border-radius:8px;
+  background:#4A6FA5;
+  color:white;
+  cursor:pointer;
+}
+
+#undoBtn:disabled {
+  opacity:0.4;
+  cursor:not-allowed;
+}
+
+#historyInfo {
+  margin-left:10px;
+  font-size:14px;
+  color:#666;
+}

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Routes</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+</head>
+<body>
+    <h1>Registered Routes</h1>
+    <ul>
+    {% for route in routes %}
+    {% set parts = route.split(" → ") %}
+    <li>
+        <a class="button" href="{{ parts[1] }}">{{ parts[0] }} → {{ parts[1] }}</a>
+    </li>
+    {% endfor %}
+    </ul>
+</body>
+</html>

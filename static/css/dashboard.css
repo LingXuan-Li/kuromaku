@@ -1,3 +1,13 @@
+@font-face {
+  font-family: 'Hibiya24';
+  src: url('font/KH-Dot-Hibiya-24.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Corporate';
+  src: url('font/Corporate-Logo-Medium-ver3.ttf') format('truetype'),
+       url('font/Corporate-Logo-Medium-ver3.otf') format('opentype');
+}
+
 /* ===== リセット ===== */
 * {
   margin: 0;
@@ -7,7 +17,7 @@
 
 /* ===== 全体 ===== */
 body {
-  font-family: "M PLUS 1p Black", sans-serif;
+  font-family: "Corporate", "Zen Old Mincho Black", sans-serif;
   background: #0f172a;
   color: white;
   height: 100vh;
@@ -205,7 +215,7 @@ body {
   animation-timing-function: linear;
   animation-fill-mode: forwards;
   animation-duration: 15s;
-  font-family: "Zen Old Mincho Black", "Noto Serif JP", serif;
+  font-family: "Hibiya24", "Zen Old Mincho Black", "Noto Serif JP", serif;
 }
 
 /* ===== 右：テーマ（15vw固定） ===== */

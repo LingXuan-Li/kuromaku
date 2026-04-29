@@ -16,3 +16,7 @@ __pycache__/
 # SQLiteのデータベースファイル
 data/values.db
 data/data.db
+
+# フォントデータ
+static/css/font/*
+!static/css/font/font_download.md

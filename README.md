@@ -20,7 +20,7 @@ Python 3.14.4 + Flask
 
 4. Run the application: `python main.py`
 
-5. Access the dashboard at [localhost:5000](http://localhost:5000)
+5. Access the dashboard at [localhost:8520](http://localhost:8520)
 
 ## Technical Stack
 
