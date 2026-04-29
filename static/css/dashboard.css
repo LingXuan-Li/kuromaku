@@ -36,15 +36,19 @@ body {
 
 /* ===== 左：コート ===== */
 .field {
-  width: 25%;
+  width: 20%;
 }
 
 .field-name {
   font-size: 3vw;
   font-weight: 900;
-  background: linear-gradient(90deg, #1e293b, #334155);
   padding: 10px 20px;
-  border-left: 8px solid #38bdf8;
+}
+
+.field-name-large {
+  font-size: 8vw;
+  font-weight: 900;
+  padding: 10px 20px;
 }
 
 /* ===== 中央：試合情報 ===== */
@@ -107,7 +111,7 @@ body {
 
 /* ===== 下段：ゲーム名 ===== */
 .game-name {
-  font-size: 1.6vw;
+  font-size: 2vw;
   margin-top: 8px;
   padding: 4px 12px;
   background: rgba(255,255,255,0.08);
@@ -116,11 +120,10 @@ body {
 
 /* ===== 右：NEXT / 集合 ===== */
 .next-info {
-  width: 45%;
+  width: 50%;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 10px;
 }
 
 /* 行 */
@@ -133,11 +136,17 @@ body {
 /* ラベル共通 */
 .next,
 .gathering {
-  font-size: 1.4vw;
+  font-size: 1.8vw;
   font-weight: bold;
   padding: 4px 10px;
   margin-right: 8px;
   border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 10vw;
+  padding: 0;
+  text-align: center;
 }
 
 /* NEXT */
@@ -162,7 +171,7 @@ body {
 
 /* NEXTの試合名 */
 .next-game-name {
-  font-size: 1.2vw;
+  font-size: 2vw;
   margin-left: 10px;
   opacity: 0.8;
 }

@@ -1,15 +1,21 @@
+@font-face {
+  font-family: 'Corporate';
+  src: url('font/Corporate-Logo-Medium-ver3.ttf') format('truetype'),
+       url('font/Corporate-Logo-Medium-ver3.otf') format('opentype');
+}
+
 body {
     margin: 0;
     height: 100vh;
     display: flex;
     flex-direction: column; /* ← 縦積み */
-    font-family: sans-serif;
+    font-family: "Corporate", sans-serif;
     background: #1e1e1e;
 }
 
 /* エディタ（上） */
 #editor {
-    flex: 1;              /* ← 上半分 */
+    flex: 1;
     width: 100%;
     padding: 15px;
     font-family: monospace;
@@ -27,11 +33,12 @@ body {
 /* プレビュー（下） */
 #preview {
     white-space: pre-wrap;
-    flex: 1;              /* ← 下半分 */
+    flex: 1;
     width: 100%;
     padding: 15px;
+    font-family: "Corporate", sans-serif;
     overflow-y: auto;
-    background: #252526;   /* VSCodeっぽい暗色 */
+    background: #252526;
     color: #d4d4d4;
     box-sizing: border-box;
 }
@@ -50,7 +57,7 @@ body {
     border-radius: 4px;
 }
 
-/* 右クリックメニュー（VSCode風ダーク） */
+/* 右クリックメニュー */
 .menu {
     position: absolute;
     display: none;
