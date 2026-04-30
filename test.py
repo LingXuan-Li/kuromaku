@@ -308,7 +308,7 @@ def load_message():
 
 def message_parse(text: str) -> str:
     text = re.sub(r'\*\*(.*?)\*\*', r'<span style="color: red;">\1</span>', text)
-    text = re.sub(r'\$\$(.*?)\$\$', r'<span style="color: springgreen;">\1</span>', text)
+    text = re.sub(r'\$\$(.*?)\$\$', r'<span style="color: #61c802;">\1</span>', text)
     text = re.sub(r'\@\@(.*?)\@\@', r'<span style="color: orange;">\1</span>', text)
     return text
 
