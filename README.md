@@ -25,8 +25,11 @@ Python 3.14.4 + Flask
 ## Technical Stack
 
 **Backend:** Python 3.14.4 with Flask framework
+
 **Database:** SQLite for message storage, CSV for data files
+
 **Frontend:** HTML5, CSS3, JavaScript
+
 **Data Format:** CSV for easy Excel compatibility
 
 ## 連絡先 / Contact
