@@ -10,7 +10,7 @@ Copyright (c) 2026 LingXuan-Li
 
 Python 3.14.4 + Flask
 
-## How to use it?
+## How to Use
 
 1. Clone or download the repository
 
