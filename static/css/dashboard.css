@@ -40,7 +40,7 @@ body {
 }
 
 .field-name {
-  font-size: 3vw;
+  font-size: 2.5vw;
   font-weight: 900;
   padding: 10px 20px;
 }
@@ -89,18 +89,20 @@ body {
 
 /* チーム枠（崩れ防止） */
 .team {
-  min-width: 8vw;
+  min-width: 0;
+  flex: 1;
   text-align: center;
 }
 
 /* チーム名 */
 .team-name-x,
 .team-name-y {
-  font-size: 4vw;
+  font-size: clamp(20px, 5vw, 70px);
   font-weight: 900;
   letter-spacing: 0.05em;
-  text-shadow: 0 0 15px rgba(255,255,255,0.25);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* VS */
@@ -116,11 +118,12 @@ body {
   padding: 4px 12px;
   background: rgba(255,255,255,0.08);
   border-radius: 6px;
+  min-width: 0;
 }
 
 /* ===== 右：NEXT / 集合 ===== */
 .next-info {
-  width: 40%;
+  width: 45%;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -136,15 +139,15 @@ body {
 /* ラベル共通 */
 .next,
 .gathering {
-  font-size: 1.8vw;
+  font-size: 2.5vw;
   font-weight: bold;
-  padding: 4px 10px;
+  padding: 0 0.5em;
   margin-right: 8px;
   border-radius: 4px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 8vw;
+  width: 12vw;
   padding: 0;
   text-align: center;
 }
@@ -164,14 +167,14 @@ body {
 /* チーム名 */
 .next-team,
 .gathering-team {
-  font-size: 2vw;
+  font-size: 2.5vw;
   font-weight: 900;
-  min-width: 8vw; /* 崩れ防止 */
+  min-width: 0; /* 崩れ防止 */
 }
 
 /* NEXTの試合名 */
 .next-game-name {
-  font-size: 2vw;
+  font-size: 2.5vw;
   margin-left: 10px;
   opacity: 0.8;
 }
@@ -182,9 +185,6 @@ body {
   content: "---";
   opacity: 0.6;
 }
-
-/* test */
-
 
 /* ===== インフォメーションバー ===== */
 .info-bar {
