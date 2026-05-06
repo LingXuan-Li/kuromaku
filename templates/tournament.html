@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>トーナメント & 試合進行管理 (API連携版)</title>
+<style>
+/* 既存のスタイルを維持しつつ、読み込み中の表示などを微調整 */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+body {
+    font-family: 'Arial Black', Arial, sans-serif;
+    background: linear-gradient(135deg, #1565c0 0%, #1e88e5 45%, #29b6f6 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+#top-bar {
+    padding: 14px 18px 0;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+#top-bar h1 {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: #fff;
+    text-shadow: 2px 2px 0 #0d47a1;
+    letter-spacing: .1em;
+}
+#dirtyBanner {
+    display: none;
+    background: #e65100;
+    color: #fff;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: .72rem;
+    font-weight: 900;
+}
+#dirtyBanner.show {
+    display: block;
+}
+#undoPanel {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    margin-left: auto;
+}
+#undoBtn {
+    padding: 4px 12px;
+    background: rgba(255, 255, 255, .15);
+    border: 1px solid rgba(255, 255, 255, .4);
+    border-radius: 6px;
+    color: #fff;
+    font-family: inherit;
+    font-size: .72rem;
+    cursor: pointer;
+}
+#undoBtn:hover {
+    background: rgba(255, 255, 255, .28);
+}
+#historyInfo {
+    font-size: .66rem;
+    color: rgba(255, 255, 255, .6);
+}
+#main {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+}
+/* LEFT: TOURNAMENT */
+#tourn-panel {
+    width: 570px;
+    min-width: 570px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 8px 20px;
+    border-right: 3px solid rgba(0, 0, 60, .25);
+}
+.tabs {
+    display: flex;
+    gap: 7px;
+    flex-wrap: wrap;
+}
+.tab {
+    padding: 5px 14px;
+    background: rgba(255, 255, 255, .14);
+    border: 2px solid rgba(255, 255, 255, .38);
+    border-radius: 7px;
+    color: #fff;
+    font-size: .76rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+}
+.tab.active {
+    background: rgba(255, 255, 255, .33);
+    border-color: #fff;
+}
+.tab:hover {
+    background: rgba(255, 255, 255, .24);
+}
+.bracket-container {
+    position: relative;
+    width: 530px;
+    height: 262px;
+}
+svg.lines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+.match-box {
+    position: absolute;
+    width: 122px;
+    background: rgba(10, 42, 110, .62);
+    border: 2px solid rgba(255, 255, 255, .55);
+    border-radius: 9px;
+    padding: 5px 8px;
+    cursor: grab;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, .3);
+    z-index: 10;
+    font-size: .64rem;
+    color: #fff;
+    transition: border-color .2s, box-shadow .2s;
+}
+.match-box[draggable=true]:hover {
+    border-color: #ffe082;
+    box-shadow: 0 5px 16px rgba(0, 0, 0, .4);
+}
+.match-box.dragging-native {
+    opacity: .45;
+}
+.match-box.scheduled {
+    border-color: #81c784;
+}
+.mb-label {
+    font-size: .52rem;
+    color: rgba(255, 255, 255, .72);
+    font-weight: 700;
+    letter-spacing: .08em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.mb-scheduled-badge {
+    background: #81c784;
+    color: #1b5e20;
+    border-radius: 3px;
+    padding: 1px 4px;
+    font-size: .5rem;
+}
+.mb-drag-hint {
+    font-size: .48rem;
+    color: rgba(255, 255, 255, .5);
+}
+.mb-team {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.5;
+    font-size: .66rem;
+}
+.mb-vs {
+    color: rgba(255, 255, 255, .5);
+    text-align: center;
+    font-size: .52rem;
+    line-height: 1;
+}
+.mb-winner {
+    color: #ffe082;
+    font-size: .58rem;
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.seed-row {
+    display: flex;
+    width: 530px;
+    gap: 11px;
+}
+.seed-box {
+    flex: 1;
+    min-height: 88px;
+    background: rgba(173, 216, 240, .58);
+    border: 2px solid rgba(255, 255, 255, .35);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 5px 3px 7px;
+    gap: 2px;
+    transition: opacity .3s, background .3s, border-color .3s;
+}
+.seed-box.eliminated {
+    opacity: .33;
+}
+.seed-box.champion {
+    background: rgba(255, 220, 50, .5);
+    border-color: gold;
+}
+.seed-num {
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: #0d3f7a;
+}
+.seed-name {
+    font-size: .58rem;
+    font-weight: 700;
+    color: #0d3f7a;
+    text-align: center;
+    word-break: break-all;
+    min-height: 1.5rem;
+    line-height: 1.25;
+}
+.win-btn {
+    margin-top: auto;
+    padding: 4px 0;
+    width: 90%;
+    background: #43a047;
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    font-size: .67rem;
+    font-weight: 900;
+    font-family: inherit;
+    cursor: pointer;
+}
+.win-btn:hover {
+    background: #2e7d32;
+}
+.status-pill {
+    margin-top: auto;
+    padding: 2px 7px;
+    border-radius: 20px;
+    font-size: .58rem;
+    font-weight: 900;
+}
+.status-pill.lost {
+    background: rgba(200, 30, 30, .35);
+    color: #fff;
+}
+.status-pill.champ {
+    background: gold;
+    color: #5a3a00;
+}
+.tourn-footer {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+.reset-btn {
+    padding: 6px 18px;
+    background: rgba(255, 255, 255, .13);
+    border: 2px solid rgba(255, 255, 255, .38);
+    border-radius: 50px;
+    color: #fff;
+    font-family: inherit;
+    font-size: .76rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+.reset-btn:hover {
+    background: rgba(255, 255, 255, .24);
+}
+.bracket-hint {
+    font-size: .66rem;
+    color: rgba(255, 255, 255, .55);
+}
+.champion-banner {
+    padding: 8px 20px;
+    background: rgba(255, 215, 0, .2);
+    border: 2px solid gold;
+    border-radius: 9px;
+    color: #fff;
+    font-size: .9rem;
+    font-weight: 900;
+    text-align: center;
+}
+/* RIGHT: COURT PANEL */
+#court-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 14px 20px;
+    min-width: 0;
+}
+#court-panel h2 {
+    font-size: 1.05rem;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: .08em;
+    text-shadow: 1px 1px 0 #0d47a1;
+}
+.court-hint {
+    font-size: .66rem;
+    color: rgba(255, 255, 255, .55);
+}
+.court-columns {
+    display: flex;
+    gap: 8px;
+    flex: 1;
+}
+.court-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    background: rgba(0, 0, 80, .15);
+    border: 2px dashed rgba(255, 255, 255, .22);
+    border-radius: 10px;
+    padding: 7px;
+    min-width: 0;
+    transition: border-color .2s, background .2s;
+}
+.court-col.drag-over {
+    border-color: #ffe082;
+    background: rgba(255, 220, 50, .08);
+}
+.court-col-header {
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: .12em;
+    text-shadow: 1px 1px 0 #0d47a1;
+    padding-bottom: 4px;
+    border-bottom: 1px solid rgba(255, 255, 255, .2);
+    margin-bottom: 2px;
+}
+.court-item {
+    background: rgba(255, 255, 255, .13);
+    border: 1px solid rgba(255, 255, 255, .32);
+    border-radius: 8px;
+    padding: 5px 7px;
+    display: flex;
+    gap: 5px;
+    align-items: flex-start;
+    position: relative;
+    transition: background .15s, border-color .15s;
+    cursor: default;
+}
+.court-item.status-current {
+    background: rgba(255, 220, 50, .2);
+    border-color: #ffe082;
+}
+.court-item.status-done {
+    background: rgba(0, 80, 0, .25);
+    border-color: rgba(100, 220, 100, .4);
+    opacity: .7;
+}
+.handle {
+    cursor: grab;
+    color: rgba(255, 255, 255, .65);
+    font-size: .95rem;
+    flex-shrink: 0;
+    padding-top: 2px;
+    -webkit-user-select: none;
+    user-select: none;
+}
+.item-body {
+    flex: 1;
+    min-width: 0;
+}
+.item-label-line {
+    font-size: .62rem;
+    font-weight: 900;
+    color: rgba(255, 255, 255, .82);
+}
+.item-game {
+    font-size: .58rem;
+    color: rgba(255, 255, 255, .58);
+}
+.item-teams {
+    font-size: .68rem;
+    color: #fff;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.item-winner-line {
+    font-size: .62rem;
+    color: #ffe082;
+    font-weight: 700;
+}
+.item-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex-shrink: 0;
+}
+.item-controls label {
+    font-size: .58rem;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.item-controls input[type=radio] {
+    width: 10px;
+    height: 10px;
+    accent-color: #ffe082;
+}
+.remove-btn {
+    position: absolute;
+    top: 2px;
+    right: 4px;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, .45);
+    cursor: pointer;
+    font-size: .72rem;
+    line-height: 1;
+    padding: 0;
+}
+.remove-btn:hover {
+    color: #fff;
+}
+#saveBtn {
+    padding: 8px 24px;
+    background: #1565c0;
+    border: 2px solid rgba(255, 255, 255, .38);
+    border-radius: 8px;
+    color: #fff;
+    font-family: inherit;
+    font-size: .8rem;
+    font-weight: 900;
+    cursor: pointer;
+    align-self: flex-start;
+    margin-top: 4px;
+}
+#saveBtn:hover {
+    background: #0d47a1;
+}
+</style>
+</head>
+<body>
+
+<div id="top-bar">
+  <h1>トーナメント &amp; 試合進行管理</h1>
+  <div id="dirtyBanner">⚠ 未保存の変更があります</div>
+  <div id="undoPanel">
+    <button id="undoBtn" onclick="undo()">↩ Undo</button>
+  </div>
+</div>
+
+<div id="main">
+  <div id="tourn-panel"></div>
+  <div id="court-panel"></div>
+</div>
+
+<script>
+const BOX_POS = {
+  R1L:   {x:117, y:90},
+  R1R:   {x:283, y:90},
+  SemiL: {x:54,  y:42},
+  SemiR: {x:346, y:42},
+  Final: {x:200, y:4},
+};
+
+function isEliminated(tNum, seed) {
+  return Object.values(S.tournaments[tNum].matches).some(m =>
+    m.winner &&
+    m.winner.seed !== seed &&
+    (m.team1?.seed === seed || m.team2?.seed === seed)
+  );
+}
+
+function findActiveMatch(tNum, seed) {
+  for (const [id, m] of Object.entries(S.tournaments[tNum].matches)) {
+    if (!m.winner && m.team1 && m.team2 &&
+        (m.team1.seed === seed || m.team2.seed === seed)) {
+      return id;
+    }
+  }
+  return null;
+}
+
+function findActiveMatch(tNum, seed) {
+  for (const [id, m] of Object.entries(S.tournaments[tNum].matches)) {
+    if (!m.winner && m.team1 && m.team2 &&
+        (m.team1.seed === seed || m.team2.seed === seed)) {
+      return id;
+    }
+  }
+  return null;
+}
+
+
+/* ═══════════════ HISTORY ═══════════════ */
+
+function pushHistory() {
+  S.history.push(structuredClone({
+    tournaments: S.tournaments,
+    schedule: S.schedule,
+    PROGRESS: PROGRESS
+  }));
+
+  if (S.history.length > 30) S.history.shift();
+}
+
+function undo() {
+  if (S.history.length === 0) return;
+
+  const prev = S.history.pop();
+
+  S.tournaments = structuredClone(prev.tournaments);
+  S.schedule = structuredClone(prev.schedule);
+  PROGRESS = structuredClone(prev.PROGRESS);
+
+  S.dirty = true;
+  render();
+}
+
+/* ═══════════════ BRACKET LOGIC ═══════════════ */
+
+function isEliminated(tNum, seed) {
+  return Object.values(S.tournaments[tNum].matches).some(m =>
+    m.winner &&
+    m.winner.seed !== seed &&
+    (m.team1?.seed === seed || m.team2?.seed === seed)
+  );
+}
+
+function findActiveMatch(tNum, seed) {
+  for (const [id, m] of Object.entries(S.tournaments[tNum].matches)) {
+    if (
+      !m.winner &&
+      m.team1 &&
+      m.team2 &&
+      (m.team1.seed === seed || m.team2.seed === seed)
+    ) {
+      return id;
+    }
+  }
+  return null;
+}
+
+/* ═══════════════ SCHEDULE CORE ═══════════════ */
+
+function addToSchedule(tNum, matchId, col, beforeUid) {
+  pushHistory();
+
+  if (S.schedule.find(s => s.tNum === tNum && s.matchId === matchId)) return;
+
+  S.dirty = true;
+
+  const colItems = S.schedule
+    .filter(s => s.col === col)
+    .sort((a, b) => a.order - b.order);
+
+  let insertIdx = colItems.length;
+
+  if (beforeUid) {
+    const idx = colItems.findIndex(s => s.uid === beforeUid);
+    if (idx >= 0) insertIdx = idx;
+  }
+
+  S.schedule.push({
+    uid: newUid(),
+    tNum,
+    matchId,
+    col,
+    order: insertIdx + 0.5,
+    status: 'pending'
+  });
+
+  // 再整列
+  S.schedule
+    .filter(s => s.col === col)
+    .sort((a, b) => a.order - b.order)
+    .forEach((s, i) => s.order = i);
+
+  render();
+}
+
+function moveScheduleItem(uid, newCol, beforeUid) {
+  const item = S.schedule.find(s => s.uid === uid);
+  if (!item) return;
+
+  pushHistory();
+
+  item.col = newCol;
+
+  const colItems = S.schedule
+    .filter(s => s.col === newCol && s.uid !== uid)
+    .sort((a, b) => a.order - b.order);
+
+  let insertIdx = colItems.length;
+
+  if (beforeUid) {
+    const idx = colItems.findIndex(s => s.uid === beforeUid);
+    if (idx >= 0) insertIdx = idx;
+  }
+
+  colItems.splice(insertIdx, 0, item);
+  colItems.forEach((s, i) => s.order = i);
+
+  render();
+}
+
+function removeFromSchedule(uid) {
+  pushHistory();
+  S.schedule = S.schedule.filter(s => s.uid !== uid);
+  render();
+}
+
+function setStatus(uid, status) {
+  pushHistory();
+  const item = S.schedule.find(s => s.uid === uid);
+  if (item) item.status = status;
+  render();
+}
+
+/* ═══════════════ DATA & STATE ═══════════════ */
+let DATA = [];        // teams
+let PROGRESS = [];    // 追加
+let _uid = 0;
+const newUid = () => 'u'+(++_uid);
+
+const S = {
+  currentTournament: 1,
+  tournaments: {},
+  schedule: [],
+  history: [],
+  dirty: false,
+};
+
+/* ═══════════════ API ACTIONS ═══════════════ */
+
+async function fetchInitialData() {
+  try {
+    const res = await fetch('/api/tournaments_data');
+    if (!res.ok) throw new Error('データ取得失敗');
+
+    const json = await res.json();
+
+    DATA = json.teams || [];
+    PROGRESS = json.progress || [];
+    S.schedule = (json.schedule || []).map((s,i)=>({
+      uid: newUid(),
+      tNum: s.tournament_number,
+      matchId: s.match_id,
+      col: s.col,
+      order: s.row,
+      status: s.status || 'pending'
+    }));
+
+    // トーナメント初期化
+    getTNums().forEach(num => {
+      S.tournaments[num] = initTournament(num);
+    });
+
+    // 進行データ反映
+    applyProgress();
+
+    render();
+  } catch (err) {
+    console.error(err);
+    alert('データの読み込みに失敗しました。');
+  }
+}
+
+/* ═══════════════ PROGRESS適用 ═══════════════ */
+
+function applyProgress() {
+  PROGRESS.forEach(p => {
+    const t = S.tournaments[p.tournament_number];
+    if (!t) return;
+
+    const m = t.matches[p.match_id];
+    if (!m) return;
+
+    const winner = [m.team1, m.team2].find(
+      tm => tm?.seed === p.winner_seed
+    );
+
+    if (winner) {
+      m.winner = winner;
+      propagate(t);
+    }
+  });
+}
+
+/* ═══════════════ SAVE ═══════════════ */
+
+async function save() {
+  const courtNames = ['A', 'B', 'C'];
+
+  // schedule
+  const schedulePayload = S.schedule.map(s => {
+    const t = S.tournaments[s.tNum];
+    const m = t?.matches[s.matchId];
+
+    return {
+      tournament_number: s.tNum,
+      match_id: s.matchId,
+      field: courtNames[s.col] + 'コート',
+      label: m?.label || '',
+      team_x: m?.team1?.team_name || '未定',
+      team_y: m?.team2?.team_name || '未定',
+      game: t?.gameName || '',
+      col: s.col,
+      row: Math.floor(s.order),
+      status: s.status
+    };
+  });
+
+  // progress
+  const progressPayload = [];
+  Object.entries(S.tournaments).forEach(([tNum, t]) => {
+    Object.values(t.matches).forEach(m => {
+      if (m.winner) {
+        progressPayload.push({
+          tournament_number: Number(tNum),
+          match_id: m.id,
+          winner_seed: m.winner.seed
+        });
+      }
+    });
+  });
+
+  try {
+    const res = await fetch('/api/save_match', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        schedule: schedulePayload,
+        progress: progressPayload
+      })
+    });
+    
+    const text = await res.text();
+
+    if (!res.ok) {
+        console.error("サーバーエラー:", text);
+        throw new Error(text);
+    }
+
+    alert('保存が完了しました。');
+    S.dirty = false;
+    document.getElementById('dirtyBanner').classList.remove('show');
+
+  } catch (err) {
+    console.error(err);
+    alert('保存に失敗しました。\n' + err.message);
+  }
+}
+
+function setWinner(tNum, matchId, seed) {
+  const t = S.tournaments[tNum];
+  const m = t?.matches?.[matchId];
+  if (!m) return;
+
+  const winner = [m.team1, m.team2].find(tm => tm?.seed === seed);
+  if (!winner) return;
+
+  pushHistory();
+
+  m.winner = winner;
+  propagate(t);
+
+  S.dirty = true;
+  render();
+}
+
+/* ═══════════════ LOGIC（既存そのまま） ═══════════════ */
+
+function getTNums() {
+  return [...new Set(DATA.map(d=>d.tournament_number))].sort((a,b)=>a-b);
+}
+
+function initTournament(num) {
+  const bySeed = {};
+  DATA.filter(d=>d.tournament_number===num).forEach(t=>bySeed[t.seed]=t);
+  const gameName = DATA.find(d=>d.tournament_number===num)?.game_name ?? '';
+  return {
+    bySeed, gameName,
+    matches:{
+      R1L:  {id:'R1L',  label:'1回戦', team1:bySeed[2],team2:bySeed[3],winner:null},
+      R1R:  {id:'R1R',  label:'1回戦', team1:bySeed[4],team2:bySeed[5],winner:null},
+      SemiL:{id:'SemiL',label:'準決勝',team1:bySeed[1],team2:null,     winner:null},
+      SemiR:{id:'SemiR',label:'準決勝',team1:null,     team2:bySeed[6],winner:null},
+      Final:{id:'Final',label:'決勝',  team1:null,     team2:null,     winner:null},
+    }
+  };
+}
+
+function propagate(t) {
+  t.matches.SemiL.team2 = t.matches.R1L.winner  || null;
+  t.matches.SemiR.team1 = t.matches.R1R.winner  || null;
+  t.matches.Final.team1 = t.matches.SemiL.winner || null;
+  t.matches.Final.team2 = t.matches.SemiR.winner || null;
+}
+
+/* ═══════════════ RENDER ═══════════════ */
+function el(tag,cls){const e=document.createElement(tag);if(cls)e.className=cls;return e;}
+
+function render() {
+  if (DATA.length === 0) return; // データ未取得時は描画しない
+  renderTournament();
+  renderCourt();
+  const db = document.getElementById('dirtyBanner');
+  if(db) S.dirty ? db.classList.add('show') : db.classList.remove('show');
+  // const hi = document.getElementById('historyInfo');
+  // if(hi) hi.textContent = `履歴: ${S.history.length}`;
+}
+
+function renderTournament() {
+  const panel = document.getElementById('tourn-panel');
+  panel.innerHTML='';
+  const tNum = S.currentTournament;
+  const t = S.tournaments[tNum];
+
+  const tabs = el('div','tabs');
+  getTNums().forEach(num=>{
+    const gn = DATA.find(d=>d.tournament_number===num)?.game_name??'';
+    const btn = el('button','tab'+(num===tNum?' active':''));
+    btn.textContent = `T${num}（${gn}）`;
+    btn.onclick=()=>{S.currentTournament=num;render();};
+    tabs.appendChild(btn);
+  });
+  panel.appendChild(tabs);
+
+  const container = el('div','bracket-container');
+  const svgNS='http://www.w3.org/2000/svg';
+  const svg=document.createElementNS(svgNS,'svg');
+  svg.setAttribute('class','lines');
+  svg.setAttribute('viewBox','0 0 530 262');
+  const g=document.createElementNS(svgNS,'g');
+  g.setAttribute('stroke','#0d2f6e'); g.setAttribute('stroke-width','3'); g.setAttribute('fill','none');
+  [
+    [132,262,132,178],[221,262,221,178],[132,178,221,178],[177,178,177,140],
+    [310,262,310,178],[399,262,399,178],[310,178,399,178],[355,178,355,140],
+    [43,262,43,140],[43,140,177,140],[110,140,110,80],
+    [355,140,488,140],[488,262,488,140],[421,140,421,80],
+    [110,80,421,80],[266,80,266,38],
+  ].forEach(([x1,y1,x2,y2])=>{
+    const ln=document.createElementNS(svgNS,'line');
+    ln.setAttribute('x1',x1);ln.setAttribute('y1',y1);ln.setAttribute('x2',x2);ln.setAttribute('y2',y2);
+    g.appendChild(ln);
+  });
+  svg.appendChild(g);
+  container.appendChild(svg);
+
+  Object.values(t.matches).forEach(m=>{
+    const pos = BOX_POS[m.id];
+    const isScheduled = S.schedule.some(s=>s.tNum===tNum&&s.matchId===m.id);
+    const box = el('div','match-box'+(isScheduled?' scheduled':''));
+    box.style.left=pos.x+'px'; box.style.top=pos.y+'px';
+    box.setAttribute('draggable','true');
+
+    const lbl=el('div','mb-label');
+    const lblText=document.createElement('span'); lblText.textContent=m.label; lbl.appendChild(lblText);
+    if(isScheduled){const b=el('span','mb-scheduled-badge');b.textContent='登録済';lbl.appendChild(b);}
+    box.appendChild(lbl);
+
+    const t1=el('div','mb-team'); t1.textContent=m.team1?.team_name??'未定'; box.appendChild(t1);
+    const vs=el('div','mb-vs');   vs.textContent='vs'; box.appendChild(vs);
+    const t2=el('div','mb-team'); t2.textContent=m.team2?.team_name??'未定'; box.appendChild(t2);
+    if(m.winner){const w=el('div','mb-winner');w.textContent='🏆 '+m.winner.team_name;box.appendChild(w);}
+
+    box.addEventListener('dragstart',e=>{
+      e.dataTransfer.setData('application/json',JSON.stringify({type:'bracket',tNum,matchId:m.id}));
+    });
+    container.appendChild(box);
+  });
+  panel.appendChild(container);
+
+  const seedRow=el('div','seed-row');
+  const champion=t.matches.Final.winner;
+  [1,2,3,4,5,6].forEach(seed=>{
+    const team=t.bySeed[seed];
+    const elim=isEliminated(tNum,seed);
+    const isChamp=champion?.seed===seed;
+    const activeId=findActiveMatch(tNum,seed);
+    const box=el('div','seed-box'+(elim?' eliminated':'')+(isChamp?' champion':''));
+    const num=el('div','seed-num'); num.textContent=seed; box.appendChild(num);
+    const nm=el('div','seed-name'); nm.textContent=team?.team_name??'—'; box.appendChild(nm);
+    if(isChamp){const p=el('div','status-pill champ');p.textContent='🏆 優勝';box.appendChild(p);}
+    else if(elim){const p=el('div','status-pill lost');p.textContent='敗退';box.appendChild(p);}
+    else if(activeId){
+      const btn=el('button','win-btn'); btn.textContent='勝利';
+      btn.onclick=()=>setWinner(tNum,activeId,seed); box.appendChild(btn);
+    }
+    seedRow.appendChild(box);
+  });
+  panel.appendChild(seedRow);
+
+  const footer=el('div','tourn-footer');
+  if(champion){const b=el('div','champion-banner');b.textContent='🏆 優勝: '+champion.team_name;footer.appendChild(b);}
+  const rb=el('button','reset-btn');rb.textContent='🔄 リセット';
+  rb.onclick=()=>{S.tournaments[tNum]=initTournament(tNum);render();};
+  footer.appendChild(rb);
+  panel.appendChild(footer);
+}
+
+function renderCourt() {
+  const panel = document.getElementById('court-panel');
+  panel.innerHTML='';
+  const h2=el('h2'); h2.textContent='試合進行管理'; panel.appendChild(h2);
+  const colWrap=el('div','court-columns');
+  ['A','B','C'].forEach((name,ci)=>{
+    const col=el('div','court-col');
+    const hdr=el('div','court-col-header'); hdr.textContent=name+'コート'; col.appendChild(hdr);
+    const colItems=S.schedule.filter(s=>s.col===ci).sort((a,b)=>a.order-b.order);
+    colItems.forEach(sItem=>{
+      const m=S.tournaments[sItem.tNum]?.matches[sItem.matchId];
+      col.appendChild(renderCourtItem(sItem,m));
+    });
+    col.addEventListener('dragover',e=>e.preventDefault());
+    col.addEventListener('drop',e=>{
+      e.preventDefault();
+      let data; try{data=JSON.parse(e.dataTransfer.getData('application/json'));}catch{return;}
+      const items=[...col.querySelectorAll('.court-item')];
+      let beforeUid=null;
+      for(const it of items){
+        const r=it.getBoundingClientRect();
+        if(e.clientY<r.top+r.height/2){beforeUid=it.dataset.uid;break;}
+      }
+      if(data.type==='bracket') addToSchedule(data.tNum,data.matchId,ci,beforeUid);
+      else if(data.type==='court') moveScheduleItem(data.uid,ci,beforeUid);
+    });
+    colWrap.appendChild(col);
+  });
+  panel.appendChild(colWrap);
+  const saveBtn=el('button'); saveBtn.id='saveBtn'; saveBtn.textContent='💾 サーバーへ保存';
+  saveBtn.onclick=save;
+  panel.appendChild(saveBtn);
+}
+
+function renderCourtItem(sItem, m) {
+  const gameName = DATA.find(d=>d.tournament_number===sItem.tNum)?.game_name??'';
+  const itemEl=el('div','court-item status-'+sItem.status);
+  itemEl.dataset.uid=sItem.uid;
+  itemEl.setAttribute('draggable','true');
+  const handle=el('span','handle'); handle.textContent='⠿'; itemEl.appendChild(handle);
+  const body=el('div','item-body');
+  const lbl=el('div','item-label-line'); lbl.textContent=(m?.label??'?')+' — T'+sItem.tNum; body.appendChild(lbl);
+  const gm=el('div','item-game'); gm.textContent=gameName; body.appendChild(gm);
+  const teams=el('div','item-teams');
+  teams.textContent=(m?.team1?.team_name??'未定')+' vs '+(m?.team2?.team_name??'未定');
+  body.appendChild(teams);
+  itemEl.appendChild(body);
+  const ctrl=el('div','item-controls');
+  [['pending','未'],['current','今'],['done','終']].forEach(([val,l])=>{
+    const label=el('label');
+    const radio=document.createElement('input'); radio.type='radio'; radio.name='st_'+sItem.uid; radio.value=val;
+    if(sItem.status===val) radio.checked=true;
+    radio.addEventListener('change',()=>{ if(radio.checked) setStatus(sItem.uid,val); });
+    label.appendChild(radio); label.appendChild(document.createTextNode(l));
+    ctrl.appendChild(label);
+  });
+  itemEl.appendChild(ctrl);
+  const rm=el('button','remove-btn'); rm.textContent='✕'; rm.onclick=()=>removeFromSchedule(sItem.uid);
+  itemEl.appendChild(rm);
+  itemEl.addEventListener('dragstart',e=>{
+    e.dataTransfer.setData('application/json',JSON.stringify({type:'court',uid:sItem.uid}));
+  });
+  return itemEl;
+}
+
+/* ═══════════════ INIT ═══════════════ */
+fetchInitialData();
+</script>
+</body>
+</html>
