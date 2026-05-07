@@ -13,7 +13,11 @@ DEBUG = True
 DB_PATH = "data/data.db"
 db = peewee.SqliteDatabase(DB_PATH)
 
-CSV_PATH = "data/tournaments.csv"
+GAME_PATH = "data/tournaments.csv"
+CULTURE_CLUB_PATH = "data/culture_club.csv"
+SPORTS_CLUB_PATH = "data/sports_club.csv"
+
+MESSAGE_INDEX = 0
 
 # DB共通処理
 class BaseModel(peewee.Model):
@@ -53,17 +57,54 @@ class DashboardData(BaseModel):
     class Meta:
         table_name = "dashboard_data"
 
+class CultureClub(BaseModel):
+    team_name = peewee.CharField()
+    first = peewee.CharField()
+    second = peewee.CharField()
+    third = peewee.CharField()
+    fourth = peewee.CharField()
+    fifth = peewee.CharField()
+    sixth = peewee.CharField()
+
+    class Meta:
+        table_name = "culture_club"
+
+class SportsClub(BaseModel):
+    team_name = peewee.CharField()
+    first = peewee.CharField()
+    second = peewee.CharField()
+    third = peewee.CharField()
+    fourth = peewee.CharField()
+    fifth = peewee.CharField()
+    sixth = peewee.CharField()
+
+    class Meta:
+        table_name = "sports_club"
+
+class Relay(BaseModel):
+    team_name = peewee.CharField()
+    first = peewee.CharField()
+    second = peewee.CharField()
+    third = peewee.CharField()
+    fourth = peewee.CharField()
+    fifth = peewee.CharField()
+    sixth = peewee.CharField()
+    category = peewee.CharField()
+
+    class Meta:
+        table_name = "relay"
+
 # DB初期化
 def init_db():
     with db:
-        db.create_tables([Tournament,TournamentProgress, Message, DashboardData])
+        db.create_tables([Tournament,TournamentProgress, Message, DashboardData, CultureClub, SportsClub, Relay])
 
 # CSV初期投入
 def init_games_from_csv():
     if Tournament.select().count() > 0:
         return
 
-    with open(CSV_PATH, newline='', encoding='utf-8') as csvfile:
+    with open(GAME_PATH, newline='', encoding='utf-8') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
             Tournament.create(
@@ -71,6 +112,36 @@ def init_games_from_csv():
                 game_name=row['game_name'],
                 tournament_number=int(row['tournament_number']),
                 seed=int(row['seed'])
+            )
+
+def init_relay_from_csv():
+    if CultureClub.select().count() > 0 and SportsClub.select().count() > 0:
+        return
+
+    with open(CULTURE_CLUB_PATH, newline='', encoding='utf-8') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            CultureClub.create(
+                team_name=row['team_name'],
+                first=row['first'],
+                second=row['second'],
+                third=row['third'],
+                fourth=row['fourth'],
+                fifth=row['fifth'],
+                sixth=row['sixth']
+            )
+
+    with open(SPORTS_CLUB_PATH, newline='', encoding='utf-8') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            SportsClub.create(
+                team_name=row['team_name'],
+                first=row['first'],
+                second=row['second'],
+                third=row['third'],
+                fourth=row['fourth'],
+                fifth=row['fifth'],
+                sixth=row['sixth']
             )
 
 # ゲーム取得
@@ -84,6 +155,27 @@ def get_games(col_index):
         team_y=g.team_y,
         game=g.game
     ) for g in games]
+
+# メッセージ機能
+def save_message(data):
+    messages = json.loads(data)
+    with db.atomic():
+        Message.delete().execute()
+        for msg in messages:
+            Message.create(message=msg)
+
+
+def load_message():
+    messages = (Message
+                .select()
+                .order_by(Message.id.asc()))
+    return json.dumps([m.message for m in messages], ensure_ascii=False)
+
+def message_parse(text: str) -> str:
+    text = re.sub(r'\*\*(.*?)\*\*', r'<span style="color: #f01000;">\1</span>', text)
+    text = re.sub(r'\$\$(.*?)\$\$', r'<span style="color: #61c802;">\1</span>', text)
+    text = re.sub(r'\@\@(.*?)\@\@', r'<span style="color: orange;">\1</span>', text)
+    return text
 
 # ダッシュボード
 @app.route("/")
@@ -102,7 +194,7 @@ def build_for_col(col_index):
             "gathering": None
         }
 
-    # status は使わないので、単純に最初のゲームを current とする
+    # statusはとりあえず無視して、常に先頭から3件を表示する形にする
     current = dashboard_data[0]
     idx = 0
 
@@ -129,6 +221,11 @@ def api_dashboard():
 
     return jsonify(dashboard)
 
+@app.route("/api/relay")
+def api_relay():
+    relay_teams = [model_to_dict(t) for t in Relay.select()]
+    return jsonify(relay_teams)
+
 @app.route("/api/info")
 def api_info():
     global MESSAGE_INDEX
@@ -147,15 +244,15 @@ def api_info():
         "message": msg
     })
 
-# テーブルエディタ
-@app.route("/table_editor")
-def table_editor():
+# トーナメントエディタ
+@app.route("/tournaments_editor")
+def tournaments_editor():
     return render_template("tournament.html")
 
 # 旧 /edit ルートはリダイレクトに変更
 @app.route("/edit", methods=["GET", "POST"])
 def edit():
-    return redirect(url_for('table_editor'))
+    return redirect(url_for('tournaments_editor'))
 
 def model_to_dict(model_instance):
     # インスタンスが持っているフィールド名と値を取り出して辞書にする
@@ -189,29 +286,58 @@ def save_matches():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+# リレーエディタ
+@app.route("/relay_editor")
+def relay_editor():
+    culture_club = CultureClub.select().order_by(CultureClub.id.asc())
+    sports_club = SportsClub.select().order_by(SportsClub.id.asc())
+    return render_template("relay.html", culture_club=culture_club, sports_club=sports_club)
 
-# メッセージ機能
-MESSAGE_INDEX = 0
-def save_message(data):
-    messages = json.loads(data)
+@app.route("/api/relay_load", methods=["GET"])
+def relay_load():
+    relay = Relay.select().order_by(Relay.id.asc())
+    return jsonify([model_to_dict(relay) for relay in relay])
+
+@app.route("/api/relay_save", methods=["POST"])
+def relay_save():
+    data = request.get_json(silent=True) or []
+    if data.get("category") == "culture":
+        model = CultureClub
+    elif data.get("category") == "sports":
+        model = SportsClub
+    elif data.get("category") == "relay":
+        model = [
+            {
+                "team_name": data.get("team_name", ""),
+                "first": data.get("first", ""),
+                "second": data.get("second", ""),
+                "third": data.get("third", ""),
+                "fourth": data.get("fourth", ""),
+                "fifth": data.get("fifth", ""),
+                "sixth": data.get("sixth", "")
+            }
+        ]
+    else:
+        return jsonify({"status": "error", "message": "Invalid category"}), 400
+
     with db.atomic():
-        Message.delete().execute()
-        for msg in messages:
-            Message.create(message=msg)
+        model.delete().execute()
+        if isinstance(model, list):
+            Relay.insert_many(model).execute()
+        else:
+            for item in data.get("items", []):
+                model.create(
+                    team_name=item.get("team_name", ""),
+                    first=item.get("first", ""),
+                    second=item.get("second", ""),
+                    third=item.get("third", ""),
+                    fourth=item.get("fourth", ""),
+                    fifth=item.get("fifth", ""),
+                    sixth=item.get("sixth", "")
+                )
+    return jsonify({"status": "ok"})
 
-
-def load_message():
-    messages = (Message
-                .select()
-                .order_by(Message.id.asc()))
-    return json.dumps([m.message for m in messages], ensure_ascii=False)
-
-def message_parse(text: str) -> str:
-    text = re.sub(r'\*\*(.*?)\*\*', r'<span style="color: #f01000;">\1</span>', text)
-    text = re.sub(r'\$\$(.*?)\$\$', r'<span style="color: #61c802;">\1</span>', text)
-    text = re.sub(r'\@\@(.*?)\@\@', r'<span style="color: orange;">\1</span>', text)
-    return text
-
+# メッセージエディタ
 @app.route("/api/message_save", methods=["POST"])
 def message_save():
     data = request.get_json(silent=True) or {}
@@ -266,5 +392,7 @@ if __name__ == "__main__":
     os.makedirs("data", exist_ok=True)
     init_db()
     init_games_from_csv()
+    init_relay_from_csv()
     print(f"Starting server on port {PORT}...")
+    print(f"Access the admin panel at http://localhost:{PORT}/admin")
     app.run(debug=DEBUG, port=PORT)

@@ -35,9 +35,9 @@ function updateDiff(newData, oldData) {
 function updateField(prefix, d) {
     document.getElementById(`${prefix}-teamX`).textContent = d.teamX || "---";
     document.getElementById(`${prefix}-teamY`).textContent = d.teamY || "---";
-    document.getElementById(`${prefix}-game`).textContent = d.game || "---";
+    // document.getElementById(`${prefix}-game`).textContent = d.game || "---";
     document.getElementById(`${prefix}-next`).textContent = d.next || "---";
-    document.getElementById(`${prefix}-next-game`).textContent = d.next_game || "---";
+    // document.getElementById(`${prefix}-next-game`).textContent = d.next_game || "---";
     document.getElementById(`${prefix}-gathering`).textContent = d.gathering || "---";
 }
 

@@ -25,40 +25,71 @@ body {
 }
 
 /* ===== 各コート行 ===== */
-#field-a, #field-b, #field-c {
+#field-a,
+#field-b,
+#field-c {
   display: flex;
   align-items: center;
   width: 100vw;
   height: 27vh;
   padding: 0 20px;
   border-bottom: 2px solid rgba(255,255,255,0.15);
+  gap: 20px;
+  overflow: hidden;
 }
 
-/* ===== 左：コート ===== */
+/* 左 */
 .field {
-  width: 20%;
-}
-
-.field-name {
-  font-size: 2.5vw;
-  font-weight: 900;
-  padding: 10px 20px;
+  flex: 0 0 10%;
 }
 
 .field-name-large {
-  font-size: 8vw;
-  font-weight: 900;
-  padding: 10px 20px;
+  font-size: 20vh;
+  font-weight: bold;
+  text-align: center;
 }
 
-/* ===== 中央：試合情報 ===== */
+/* 中央 */
 .match-info {
-  width: 40%;
+  flex: 1;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
+  min-width: 0;
+}
+
+/* チーム行 */
+.team-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  width: 100%;
+  min-width: 0;
+}
+
+/* チーム */
+.team {
+  min-width: 0;
+}
+
+/* チーム名 */
+.team-name-x,
+.team-name-y {
+  font-size: clamp(32px, 4vw, 72px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 右 */
+.next-info {
+  flex: 0 0 40%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+  min-width: 0;
 }
 
 /* ===== データなし状態 ===== */
@@ -68,15 +99,6 @@ body {
 
 .no-data .vs {
   visibility: hidden;
-}
-
-.no-data .game-name {
-  background: rgba(255,255,255,0.15);
-}
-
-.no-data .game-name-text {
-  font-size: 2vw;
-  font-weight: bold;
 }
 
 /* ===== 上段：チーム ===== */
@@ -107,60 +129,76 @@ body {
 
 /* VS */
 .vs {
-  font-size: 2vw;
+  font-size: 4vw;
   opacity: 0.6;
-}
-
-/* ===== 下段：ゲーム名 ===== */
-.game-name {
-  font-size: 2vw;
-  margin-top: 8px;
-  padding: 4px 12px;
-  background: rgba(255,255,255,0.08);
-  border-radius: 6px;
-  min-width: 0;
 }
 
 /* ===== 右：NEXT / 集合 ===== */
 .next-info {
-  width: 45%;
+  flex: 0 0 40%;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  gap: 0;      /* 行間ゼロ */
+  height: 100%; /* 親の高さに合わせる */
+  align-items: flex-start; /* 左寄せにしたい場合 */
+  padding-left: 0; /* 必要に応じて */
 }
 
-/* 行 */
 .next-game-info,
 .gathering-info {
+  flex: 1;                /* 上下いっぱいに広がる */
   display: flex;
-  align-items: center;
+  align-items: center;    /* 文字縦中央 */
+  margin: 0;
+  padding: 0;
+  line-height: 1;
 }
 
-/* ラベル共通 */
 .next,
 .gathering {
-  font-size: 2.5vw;
-  font-weight: bold;
-  padding: 0 0.5em;
-  margin-right: 8px;
-  border-radius: 4px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 12vw;
-  padding: 0;
+  font-size: 8vh;          /* 文字サイズはそのまま */
+  width: 12vw;              /* 横幅を画面幅の8%に固定 */
+  height: 100%;            /* 行の高さにフィットさせる */
   text-align: center;
+  margin-right: 10px;
+  display: flex;
+  align-items: center;     /* 文字縦中央 */
+  justify-content: center; /* 文字横中央 */
+}
+
+.next {
+  background: dodgerblue;
+  color: white;
+}
+
+.gathering {
+  background: red;
+  color: white;
+}
+
+/* チーム名 */
+.next-team,
+.gathering-team {
+  font-size: 2.5vw;
+  font-weight: 900;
+
+  margin: 0;
+  padding: 0;
+
+  line-height: 1;
 }
 
 /* NEXT */
 .next {
-  background: red;
+  font-size: 8vh;
+  background: dodgerblue;
   color: white;
 }
 
 /* 集合 */
 .gathering {
-  background: dodgerblue;
+  font-size: 8vh;
+  background: red;
   color: white;
 }
 
