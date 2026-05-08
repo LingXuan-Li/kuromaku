@@ -1,209 +1,125 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/edit.css') }}">
-    <title>Dashboard Editor</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>/edit</title>
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: monospace;
+    background: #f5f5f2;
+    padding: 2rem;
+    color: #1a1a1a;
+    min-height: 100vh;
+}
+
+/* ── HEADER ── */
+.header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #e0e0d8;
+    padding-bottom: 1rem;
+}
+
+.header h1 {
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.badge {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: #d1fae5;
+    color: #065f46;
+}
+
+/* ── SECTION ── */
+.section-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: #888;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+/* ── CARDS ── */
+.card-grid {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.card {
+    width: 260px;
+    background: #fff;
+    border: 1px solid #e8e8e2;
+    border-radius: 8px;
+    padding: 1.25rem 1.25rem 1rem;
+    cursor: pointer;
+    transition: border-color .15s, box-shadow .15s;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.card:hover {
+    border-color: #aaa;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+}
+
+.card-path {
+    font-size: 15px;
+    font-weight: 500;
+    color: #1a1a1a;
+    margin-bottom: 6px;
+}
+
+.card-desc {
+    font-size: 11px;
+    color: #888;
+}
+
+.card-arrow {
+    font-size: 11px;
+    color: #ccc;
+    margin-top: 1.5rem;
+}
+</style>
 </head>
-
 <body>
-    <h1>Dashboard Editor</h1>
-    <hr>
 
-    <div class="container">
+<div class="header">
+    <h1>/edit</h1>
+    <span class="badge">dev only</span>
+</div>
 
-        <!-- ===================== Aコート ===================== -->
-        <h2>Aコート試合データ</h2>
+<div class="section-label">editors</div>
 
-        <div class="data">
-            <span class="data-stress">NOW:</span>
-            <span class="data-value">
-                {% if matchA %}
-                    {{ matchA['Team-X'] }} vs {{ matchA['Team-Y'] }} ({{ matchA['Game'] }})
-                {% else %}
-                    試合データなし
-                {% endif %}
-            </span>
+<div class="card-grid">
 
-            <hr>
+    <a class="card" href="/relay_editor">
+        <div class="card-path">/relay_editor</div>
+        <div class="card-desc">走順・リレーレース編集</div>
+        <div class="card-arrow">→</div>
+    </a>
 
-            <span class="data-stress">NEXT:</span>
-            <span class="data-value">
-                {{ next_matchA }} {% if next_gameA %}({{ next_gameA }}){% endif %}
-            </span>
+    <a class="card" href="/tournaments_editor">
+        <div class="card-path">/tournaments_editor</div>
+        <div class="card-desc">トーナメント戦編集</div>
+        <div class="card-arrow">→</div>
+    </a>
 
-            <hr>
+</div>
 
-            <span class="data-stress">GATHERING:</span>
-            <span class="data-value">
-                {{ gathering_matchA }}
-            </span>
-        </div>
-
-        <!-- ===================== Bコート ===================== -->
-        <h2>Bコート試合データ</h2>
-
-        <div class="data">
-            <span class="data-stress">NOW:</span>
-            <span class="data-value">
-                {% if matchB %}
-                    {{ matchB['Team-X'] }} vs {{ matchB['Team-Y'] }} ({{ matchB['Game'] }})
-                {% else %}
-                    試合データなし
-                {% endif %}
-            </span>
-
-            <hr>
-
-            <span class="data-stress">NEXT:</span>
-            <span class="data-value">
-                {{ next_matchB }} {% if next_gameB %}({{ next_gameB }}){% endif %}
-            </span>
-
-            <hr>
-
-            <span class="data-stress">GATHERING:</span>
-            <span class="data-value">
-                {{ gathering_matchB }}
-            </span>
-        </div>
-        
-        <!-- ===================== Cコート ===================== -->
-        <h2>Cコート試合データ</h2>
-
-        <div class="data">
-            <span class="data-stress">NOW:</span>
-            <span class="data-value">
-                {% if matchC %}
-                    {{ matchC['Team-X'] }} vs {{ matchC['Team-Y'] }} ({{ matchC['Game'] }})
-                {% else %}
-                    試合データなし
-                {% endif %}
-            </span>
-
-            <hr>
-
-            <span class="data-stress">NEXT:</span>
-            <span class="data-value">
-                {{ next_matchC }} {% if next_gameC %}({{ next_gameC }}){% endif %}
-            </span>
-
-            <hr>
-
-            <span class="data-stress">GATHERING:</span>
-            <span class="data-value">
-                {{ gathering_matchC }}
-            </span>
-        </div>
-
-        <!-- ===================== プレビュー表示 ===================== -->
-        <h2>プレビュー</h2>
-
-            <div id="preview-area">
-                <!-- A -->
-                <div class="data" id="preview_a">
-                    <h3>Aコート（プレビュー）</h3>
-                    <div>NOW: <span id="p_now_a"></span></div>
-                    <div>NEXT: <span id="p_next_a"></span></div>
-                    <div>GATHERING: <span id="p_gather_a"></span></div>
-                </div>
-
-                <hr>
-
-                <!-- B -->
-                <div class="data" id="preview_b">
-                    <h3>Bコート（プレビュー）</h3>
-                    <div>NOW: <span id="p_now_b"></span></div>
-                    <div>NEXT: <span id="p_next_b"></span></div>
-                    <div>GATHERING: <span id="p_gather_b"></span></div>
-                </div>
-
-                <hr>
-
-                <!-- C -->
-                <div class="data" id="preview_c">
-                    <h3>Cコート（プレビュー）</h3>
-                    <div>NOW: <span id="p_now_c"></span></div>
-                    <div>NEXT: <span id="p_next_c"></span></div>
-                    <div>GATHERING: <span id="p_gather_c"></span></div>
-                </div>
-            </div>
-
-        <!-- ===================== 編集フォーム ===================== -->
-        <div class="form">
-
-            <h3>進行コントロール（A/B/Cコート）</h3>
-
-            <!-- Aコート -->
-            <div class="control-box">
-                <label for="field_a">Aコート</label>
-
-                <button type="button" onclick="changeValue('field_a', -1)">－</button>
-
-                <input
-                    type="number"
-                    id="field_a"
-                    name="field_a"
-                    value="{{ values.field_a }}"
-                    min="-1"
-                >
-
-                <button type="button" onclick="changeValue('field_a', 1)">＋</button>
-            </div>
-
-            <hr>
-
-            <!-- Bコート -->
-            <div class="control-box">
-                <label for="field_b">Bコート</label>
-
-                <button type="button" onclick="changeValue('field_b', -1)">－</button>
-
-                <input
-                    type="number"
-                    id="field_b"
-                    name="field_b"
-                    value="{{ values.field_b }}"
-                    min="-1"
-                >
-
-                <button type="button" onclick="changeValue('field_b', 1)">＋</button>
-            </div>
-
-            <hr>
-
-            <!-- Cコート -->
-            <div class="control-box">
-                <label for="field_c">Cコート</label>
-
-                <button type="button" onclick="changeValue('field_c', -1)">－</button>
-
-                <input
-                    type="number"
-                    id="field_c"
-                    name="field_c"
-                    value="{{ values.field_c }}"
-                    min="-1"
-                >
-
-                <button type="button" onclick="changeValue('field_c', 1)">＋</button>
-            </div>
-
-            <hr>
-
-            <!-- 保存 -->
-            <form method="POST" onsubmit="return handleSubmit(event)">
-                <input type="hidden" id="hidden_field_a" name="field_a">
-                <input type="hidden" id="hidden_field_b" name="field_b">
-                <input type="hidden" id="hidden_field_c" name="field_c">
-
-                <button type="submit" onclick="syncValues()">保存</button>
-            </form>
-
-        </div>
-    </div>
-
-    <script src="{{ url_for('static', filename='js/edit.js') }}"></script>
 </body>
 </html>

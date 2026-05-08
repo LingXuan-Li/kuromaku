@@ -89,15 +89,21 @@ class Relay(BaseModel):
     fourth = peewee.CharField()
     fifth = peewee.CharField()
     sixth = peewee.CharField()
-    category = peewee.CharField()
 
     class Meta:
         table_name = "relay"
 
+class Category(BaseModel):
+    category = peewee.CharField()
+    category_name = peewee.TextField()
+
+    class Meta:
+        table_name = "category"
+
 # DB初期化
 def init_db():
     with db:
-        db.create_tables([Tournament,TournamentProgress, Message, DashboardData, CultureClub, SportsClub, Relay])
+        db.create_tables([Tournament,TournamentProgress, Message, DashboardData, CultureClub, SportsClub, Relay, Category])
 
 # CSV初期投入
 def init_games_from_csv():
@@ -143,6 +149,14 @@ def init_relay_from_csv():
                 fifth=row['fifth'],
                 sixth=row['sixth']
             )
+
+def init_category():
+    if not Category.select().where(Category.id == 1).exists():
+        Category.create(
+            id=1,
+            category="None",
+            category_name="未設定"
+        )
 
 # ゲーム取得
 def get_games(col_index):
@@ -249,10 +263,10 @@ def api_info():
 def tournaments_editor():
     return render_template("tournament.html")
 
-# 旧 /edit ルートはリダイレクトに変更
-@app.route("/edit", methods=["GET", "POST"])
+# /edit ルートはトーナメントエディタエディタとリレーエディタ用のハブページに変更
+@app.route("/edit")
 def edit():
-    return redirect(url_for('tournaments_editor'))
+    return render_template("edit.html")
 
 def model_to_dict(model_instance):
     # インスタンスが持っているフィールド名と値を取り出して辞書にする
@@ -291,6 +305,8 @@ def save_matches():
 def relay_editor():
     culture_club = CultureClub.select().order_by(CultureClub.id.asc())
     sports_club = SportsClub.select().order_by(SportsClub.id.asc())
+    print("Culture Club:", [c.__data__ for c in culture_club])
+    print("Sports Club:", [s.__data__ for s in sports_club])
     return render_template("relay.html", culture_club=culture_club, sports_club=sports_club)
 
 @app.route("/api/relay_load", methods=["GET"])
@@ -336,6 +352,39 @@ def relay_save():
                     sixth=item.get("sixth", "")
                 )
     return jsonify({"status": "ok"})
+
+@app.route("/api/category_save", methods=["POST"])
+def category_save():
+    data = request.get_json(silent=True) or {}
+    
+    with db.atomic():
+        category = data.get("category", "")
+        if category == "culture":
+            category_name = "文化部予選"
+        elif category == "sports":
+            category_name = "体育部予選"
+        elif category == "relay":
+            category_name = "本戦"
+        elif category == "hidden":
+            category_name = "非表示"
+        else:
+            category_name = ""
+
+        Category.update(category=category).where(Category.id == 1).execute()
+        Category.update(category_name=category_name).where(Category.id == 1).execute()
+
+    return jsonify({"status": "ok"})
+
+@app.route("/api/category_load", methods=["GET"])
+def category_load():
+
+    category = Category.get_by_id(1)
+    print("Current Category:", category.category, category.category_name)
+
+    return jsonify({
+        "category": category.category,
+        "category_name": category.category_name
+    })
 
 # メッセージエディタ
 @app.route("/api/message_save", methods=["POST"])
@@ -393,6 +442,7 @@ if __name__ == "__main__":
     init_db()
     init_games_from_csv()
     init_relay_from_csv()
+    init_category()
     print(f"Starting server on port {PORT}...")
     print(f"Access the admin panel at http://localhost:{PORT}/admin")
     app.run(debug=DEBUG, port=PORT)

@@ -44,7 +44,7 @@ body {
 }
 
 .field-name-large {
-  font-size: 20vh;
+  font-size: 18vh;
   font-weight: bold;
   text-align: center;
 }
@@ -179,7 +179,7 @@ body {
 /* チーム名 */
 .next-team,
 .gathering-team {
-  font-size: 2.5vw;
+  font-size: 3vw;
   font-weight: 900;
 
   margin: 0;

@@ -1,185 +1,425 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <title>/relay_editor</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>/relay_editor</title>
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
-        body {
-            font-family: monospace;
-            background: #f5f5f2;
-            padding: 2rem;
-            color: #1a1a1a;
-        }
+body {
+    font-family: monospace;
+    background: #f5f5f2;
+    padding: 2rem;
+    color: #1a1a1a;
+    line-height: 1.5;
+}
 
-        .header {
-            display: flex;
-            align-items: baseline;
-            gap: 12px;
-            margin-bottom: 2rem;
-            border-bottom: 1px solid #e0e0d8;
-            padding-bottom: 1rem;
-        }
+/* ── HEADER ── */
+.header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #e0e0d8;
+    padding-bottom: 1rem;
+    flex-wrap: wrap;
+}
 
-        h1 {
-            font-size: 18px;
-            font-weight: 500;
-        }
+.header h1 {
+    font-size: 18px;
+    font-weight: 500;
+}
 
-        .badge {
-            font-size: 11px;
-            padding: 3px 8px;
-            border-radius: 4px;
-            background: #d1fae5;
-            color: #065f46;
-        }
+.badge {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    display: inline-block;
+}
+.badge-green  { background: #d1fae5; color: #065f46; }
+.badge-blue   { background: #eff6ff; color: #1d4ed8; }
+.badge-amber  { background: #fef3c7; color: #92400e; }
 
-        .section {
-            margin-bottom: 1.5rem;
-        }
+/* ── SECTION ── */
+.section {
+    margin-bottom: 2rem;
+}
 
-        .section-label {
-            font-size: 11px;
-            font-weight: 500;
-            color: #888;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-        }
+.section-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: #888;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
 
-        .card {
-            background: #fff;
-            border: 1px solid #e8e8e2;
-            border-radius: 8px;
-            padding: 0;
-            overflow: hidden;
-        }
+/* ── CARD ── */
+.card {
+    background: #fff;
+    border: 1px solid #e8e8e2;
+    border-radius: 8px;
+    overflow: hidden;
+}
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
-        }
+/* ── TABLE ── */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
 
-        th {
-            text-align: left;
-            font-size: 11px;
-            font-weight: 500;
-            color: #888;
-            padding: 6px 10px;
-            border-bottom: 1px solid #e8e8e2;
-            background: #fafaf8;
-        }
+th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 500;
+    color: #888;
+    padding: 6px 10px;
+    border-bottom: 1px solid #e8e8e2;
+    background: #fafaf8;
+}
 
-        td {
-            padding: 7px 10px;
-            border-bottom: 1px solid #f0f0ec;
-        }
+td {
+    padding: 7px 10px;
+    border-bottom: 1px solid #f0f0ec;
+    font-size: 13px;
+}
 
-        tr:last-child td {
-            border-bottom: none;
-        }
+tr:last-child td {
+    border-bottom: none;
+}
 
-        tr:hover td {
-            background: #fafaf8;
-        }
+tr:hover td {
+    background: #fafaf8;
+}
 
-        .pill {
-            font-size: 11px;
-            padding: 2px 6px;
-            border-radius: 4px;
-            background: #eff6ff;
-            color: #1d4ed8;
-            display: inline-block;
-        }
-    </style>
+/* ── RELAY TABLE INPUTS ── */
+.relay-table td {
+    padding: 5px 6px;
+}
+
+.relay-table input {
+    width: 100%;
+    border: 1px solid #e8e8e2;
+    border-radius: 4px;
+    padding: 4px 6px;
+    font-family: monospace;
+    font-size: 12px;
+    background: #fff;
+    color: #1a1a1a;
+    transition: border-color .15s;
+}
+
+.relay-table input:focus {
+    outline: none;
+    border-color: #aaa;
+}
+
+/* ── BUTTONS ── */
+.btn {
+    border: 1px solid #e8e8e2;
+    background: #fff;
+    color: #1a1a1a;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: monospace;
+    font-size: 11px;
+    transition: background .1s;
+}
+.btn:hover { background: #f0f0ec; }
+
+.btn-dark {
+    background: #1a1a1a;
+    color: #fff;
+    border-color: #1a1a1a;
+}
+.btn-dark:hover { background: #333; border-color: #333; }
+
+.btn-green {
+    background: #d1fae5;
+    color: #065f46;
+    border-color: #6ee7b7;
+}
+.btn-green:hover { background: #a7f3d0; }
+
+.btn-red {
+    background: #fff;
+    color: #991b1b;
+    border-color: #fecaca;
+}
+.btn-red:hover { background: #fee2e2; }
+
+/* ── CATEGORY PANEL ── */
+.category-panel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+    padding: 10px 14px;
+    background: #fff;
+    border: 1px solid #e8e8e2;
+    border-radius: 8px;
+}
+
+.category-label {
+    font-size: 11px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-right: 4px;
+}
+
+#current-category {
+    font-size: 12px;
+    font-weight: 500;
+    color: #1a1a1a;
+    margin-right: 12px;
+}
+
+.category-divider {
+    width: 1px;
+    height: 16px;
+    background: #e8e8e2;
+    margin: 0 4px;
+}
+
+/* ── SAVE ROW ── */
+.save-row {
+    margin-top: 10px;
+}
+</style>
 </head>
 <body>
-    <div class="header">
-        <h1>/relay_editor</h1>
-        <span class="badge">dev only</span>
-    </div>
 
-    <div class="section">
-        <div class="section-label">Culture Club Relay</div>
-        <div class="card">
-            <table>
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>team</th>
-                        <th>1st</th>
-                        <th>2nd</th>
-                        <th>3rd</th>
-                        <th>4th</th>
-                        <th>5th</th>
-                        <th>6th</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for cul in culture_club %}
-                        <tr>
-                            <td>{{ cul.id }}</td>
-                            <td>{{ cul.team_name }}</td>
-                            <td><span class="pill">{{ cul.first }}</span></td>
-                            <td><span class="pill">{{ cul.second }}</span></td>
-                            <td><span class="pill">{{ cul.third }}</span></td>
-                            <td><span class="pill">{{ cul.forth }}</span></td>
-                            <td><span class="pill">{{ cul.fifth }}</span></td>
-                            <td><span class="pill">{{ cul.sixth }}</span></td>
-                        </tr>
-                    {% else %}
-                        <tr>
-                            <td colspan="5" style="color:#aaa;text-align:center">（なし）</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
+<div class="header">
+    <h1>/relay_editor</h1>
+    <span class="badge badge-green">dev only</span>
+</div>
 
-    <div class="section">
-        <div class="section-label">Sports Club Relay</div>
-        <div class="card">
-            <table>
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>team</th>
-                        <th>1st</th>
-                        <th>2nd</th>
-                        <th>3rd</th>
-                        <th>4th</th>
-                        <th>5th</th>
-                        <th>6th</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for spo in sports_club %}
-                        <tr>
-                            <td>{{ spo.id }}</td>
-                            <td>{{ spo.team_name }}</td>
-                            <td><span class="pill">{{ spo.first }}</span></td>
-                            <td><span class="pill">{{ spo.second }}</span></td>
-                            <td><span class="pill">{{ spo.third }}</span></td>
-                            <td><span class="pill">{{ spo.forth }}</span></td>
-                            <td><span class="pill">{{ spo.fifth }}</span></td>
-                            <td><span class="pill">{{ spo.sixth }}</span></td>
-                        </tr>
-                    {% else %}
-                        <tr>
-                            <td colspan="5" style="color:#aaa;text-align:center">（なし）</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+<!-- カテゴリー切替 -->
+<div class="category-panel">
+    <span class="category-label">current</span>
+    <span id="current-category">読み込み中...</span>
+    <div class="category-divider"></div>
+    <button class="btn btn-green" onclick="saveCategory('culture')">文化部予選</button>
+    <button class="btn btn-green" onclick="saveCategory('sports')">体育部予選</button>
+    <button class="btn btn-green" onclick="saveCategory('relay')">本戦</button>
+    <button class="btn" onclick="saveCategory('hidden')">非表示</button>
+</div>
+
+<!-- 文化部 -->
+<div class="section">
+    <div class="section-label">Culture Club</div>
+    <div class="card">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>team</th>
+                    <th>1st</th>
+                    <th>2nd</th>
+                    <th>3rd</th>
+                    <th>4th</th>
+                    <th>5th</th>
+                    <th>6th</th>
+                    <th>add</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cul in culture_club %}
+                <tr>
+                    <td>{{ cul.id }}</td>
+                    <td>{{ cul.team_name }}</td>
+                    <td>{{ cul.first }}</td>
+                    <td>{{ cul.second }}</td>
+                    <td>{{ cul.third }}</td>
+                    <td>{{ cul.fourth }}</td>
+                    <td>{{ cul.fifth }}</td>
+                    <td>{{ cul.sixth }}</td>
+                    <td>
+                        <button class="btn btn-green" onclick='addRelay({
+                            team_name: "{{ cul.team_name }}",
+                            first:  "{{ cul.first }}",
+                            second: "{{ cul.second }}",
+                            third:  "{{ cul.third }}",
+                            fourth: "{{ cul.fourth }}",
+                            fifth:  "{{ cul.fifth }}",
+                            sixth:  "{{ cul.sixth }}"
+                        })'>追加</button>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="9" style="color:#aaa;text-align:center">（なし）</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
+</div>
+
+<!-- 体育部 -->
+<div class="section">
+    <div class="section-label">Sports Club</div>
+    <div class="card">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>team</th>
+                    <th>1st</th>
+                    <th>2nd</th>
+                    <th>3rd</th>
+                    <th>4th</th>
+                    <th>5th</th>
+                    <th>6th</th>
+                    <th>add</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for spo in sports_club %}
+                <tr>
+                    <td>{{ spo.id }}</td>
+                    <td>{{ spo.team_name }}</td>
+                    <td>{{ spo.first }}</td>
+                    <td>{{ spo.second }}</td>
+                    <td>{{ spo.third }}</td>
+                    <td>{{ spo.fourth }}</td>
+                    <td>{{ spo.fifth }}</td>
+                    <td>{{ spo.sixth }}</td>
+                    <td>
+                        <button class="btn btn-green" onclick='addRelay({
+                            team_name: "{{ spo.team_name }}",
+                            first:  "{{ spo.first }}",
+                            second: "{{ spo.second }}",
+                            third:  "{{ spo.third }}",
+                            fourth: "{{ spo.fourth }}",
+                            fifth:  "{{ spo.fifth }}",
+                            sixth:  "{{ spo.sixth }}"
+                        })'>追加</button>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="9" style="color:#aaa;text-align:center">（なし）</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Relay -->
+<div class="section">
+    <div class="section-label">Relay</div>
+    <div class="card">
+        <table class="relay-table">
+            <thead>
+                <tr>
+                    <th>team</th>
+                    <th>1st</th>
+                    <th>2nd</th>
+                    <th>3rd</th>
+                    <th>4th</th>
+                    <th>5th</th>
+                    <th>6th</th>
+                    <th>delete</th>
+                </tr>
+            </thead>
+            <tbody id="relay-body"></tbody>
+        </table>
+    </div>
+    <div class="save-row">
+        <button class="btn btn-dark" onclick="saveRelay()">保存</button>
+    </div>
+</div>
+
+<script>
+let relayData = [];
+
+async function loadRelay() {
+    const res = await fetch("/api/relay_load");
+    relayData = await res.json();
+    renderRelay();
+}
+
+function renderRelay() {
+    const tbody = document.getElementById("relay-body");
+    tbody.innerHTML = "";
+
+    if (relayData.length === 0) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td colspan="8" style="color:#aaa;text-align:center;padding:12px">（なし）</td>`;
+        tbody.appendChild(tr);
+        return;
+    }
+
+    relayData.forEach((team, index) => {
+        const tr = document.createElement("tr");
+        const fields = ['team_name','first','second','third','fourth','fifth','sixth'];
+        const cells = fields.map(f => `
+            <td>
+                <input value="${team[f] ?? ''}"
+                    onchange="updateField(${index}, '${f}', this.value)">
+            </td>`).join('');
+
+        tr.innerHTML = cells + `
+            <td>
+                <button class="btn btn-red" onclick="deleteRelay(${index})">削除</button>
+            </td>`;
+        tbody.appendChild(tr);
+    });
+}
+
+function updateField(index, key, value) {
+    relayData[index][key] = value;
+}
+
+function addRelay(team) {
+    relayData.push(team);
+    renderRelay();
+}
+
+function deleteRelay(index) {
+    relayData.splice(index, 1);
+    renderRelay();
+}
+
+async function saveRelay() {
+    await fetch("/api/relay_save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ category: "relay", items: relayData })
+    });
+    alert("Relayを保存しました");
+}
+
+async function saveCategory(category) {
+    await fetch("/api/category_save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ category })
+    });
+    await loadCategory();
+    alert(`案内表示を ${category} に切り替えました`);
+}
+
+async function loadCategory() {
+    const res = await fetch("/api/category_load");
+    const data = await res.json();
+    document.getElementById("current-category").innerText =
+        data.category_name + "（" + data.category + "）";
+}
+
+loadRelay();
+loadCategory();
+</script>
 </body>
 </html>
