@@ -64,7 +64,6 @@ class CultureClub(BaseModel):
     third = peewee.CharField()
     fourth = peewee.CharField()
     fifth = peewee.CharField()
-    sixth = peewee.CharField()
 
     class Meta:
         table_name = "culture_club"
@@ -76,7 +75,6 @@ class SportsClub(BaseModel):
     third = peewee.CharField()
     fourth = peewee.CharField()
     fifth = peewee.CharField()
-    sixth = peewee.CharField()
 
     class Meta:
         table_name = "sports_club"
@@ -88,7 +86,6 @@ class Relay(BaseModel):
     third = peewee.CharField()
     fourth = peewee.CharField()
     fifth = peewee.CharField()
-    sixth = peewee.CharField()
 
     class Meta:
         table_name = "relay"
@@ -133,8 +130,7 @@ def init_relay_from_csv():
                 second=row['second'],
                 third=row['third'],
                 fourth=row['fourth'],
-                fifth=row['fifth'],
-                sixth=row['sixth']
+                fifth=row['fifth']
             )
 
     with open(SPORTS_CLUB_PATH, newline='', encoding='utf-8') as csvfile:
@@ -146,8 +142,7 @@ def init_relay_from_csv():
                 second=row['second'],
                 third=row['third'],
                 fourth=row['fourth'],
-                fifth=row['fifth'],
-                sixth=row['sixth']
+                fifth=row['fifth']
             )
 
 def init_category():
@@ -349,7 +344,6 @@ def relay_save():
                     third=item.get("third", ""),
                     fourth=item.get("fourth", ""),
                     fifth=item.get("fifth", ""),
-                    sixth=item.get("sixth", "")
                 )
     return jsonify({"status": "ok"})
 
