@@ -209,56 +209,41 @@ tr:hover td {
     <span id="current-category">読み込み中...</span>
     <div class="category-divider"></div>
     <button class="btn btn-green" onclick="saveCategory('culture')">文化部予選</button>
-    <button class="btn btn-green" onclick="saveCategory('sports')">体育部予選</button>
+    <button class="btn btn-green" onclick="saveCategory('sports')">運動部部予選</button>
     <button class="btn btn-green" onclick="saveCategory('relay')">本戦</button>
-    <button class="btn" onclick="saveCategory('hidden')">非表示</button>
+</div>
+
+<div class="section">
+    <div class="section-label">Notice</div>
+    <p>テーブル上部: 1番レーン側</p>
+    <p>テーブル下部: 6番レーン側</p>
 </div>
 
 <!-- 文化部 -->
 <div class="section">
     <div class="section-label">Culture Club</div>
     <div class="card">
-        <table>
+        <table class="relay-table">
             <thead>
                 <tr>
-                    <th>#</th>
+                    <th>id</th>
                     <th>team</th>
                     <th>1st</th>
                     <th>2nd</th>
                     <th>3rd</th>
                     <th>4th</th>
                     <th>5th</th>
+                    <th>6th</th>
                     <th>add</th>
                 </tr>
             </thead>
-            <tbody>
-                {% for cul in culture_club %}
-                <tr>
-                    <td>{{ cul.id }}</td>
-                    <td>{{ cul.team_name }}</td>
-                    <td>{{ cul.first }}</td>
-                    <td>{{ cul.second }}</td>
-                    <td>{{ cul.third }}</td>
-                    <td>{{ cul.fourth }}</td>
-                    <td>{{ cul.fifth }}</td>
-                    <td>
-                        <button class="btn btn-green" onclick='addRelay({
-                            team_name: "{{ cul.team_name }}",
-                            first:  "{{ cul.first }}",
-                            second: "{{ cul.second }}",
-                            third:  "{{ cul.third }}",
-                            fourth: "{{ cul.fourth }}",
-                            fifth:  "{{ cul.fifth }}",
-                        })'>追加</button>
-                    </td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="9" style="color:#aaa;text-align:center">（なし）</td>
-                </tr>
-                {% endfor %}
-            </tbody>
+            <tbody id="culture-body"></tbody>
         </table>
+    </div>
+    <div class="save-row">
+    <button class="btn btn-dark" onclick="saveCulture()">
+        Culture保存
+    </button>
     </div>
 </div>
 
@@ -266,53 +251,33 @@ tr:hover td {
 <div class="section">
     <div class="section-label">Sports Club</div>
     <div class="card">
-        <table>
+        <table class="relay-table">
             <thead>
                 <tr>
-                    <th>#</th>
+                    <th>id</th>
                     <th>team</th>
                     <th>1st</th>
                     <th>2nd</th>
                     <th>3rd</th>
                     <th>4th</th>
                     <th>5th</th>
+                    <th>6th</th>
                     <th>add</th>
                 </tr>
             </thead>
-            <tbody>
-                {% for spo in sports_club %}
-                <tr>
-                    <td>{{ spo.id }}</td>
-                    <td>{{ spo.team_name }}</td>
-                    <td>{{ spo.first }}</td>
-                    <td>{{ spo.second }}</td>
-                    <td>{{ spo.third }}</td>
-                    <td>{{ spo.fourth }}</td>
-                    <td>{{ spo.fifth }}</td>
-                    <td>
-                        <button class="btn btn-green" onclick='addRelay({
-                            team_name: "{{ spo.team_name }}",
-                            first:  "{{ spo.first }}",
-                            second: "{{ spo.second }}",
-                            third:  "{{ spo.third }}",
-                            fourth: "{{ spo.fourth }}",
-                            fifth:  "{{ spo.fifth }}",
-                        })'>追加</button>
-                    </td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="9" style="color:#aaa;text-align:center">（なし）</td>
-                </tr>
-                {% endfor %}
-            </tbody>
+            <tbody id="sports-body"></tbody>
         </table>
+    </div>
+    <div class="save-row">
+    <button class="btn btn-dark" onclick="saveSports()">
+        Sports保存
+    </button>
     </div>
 </div>
 
-<!-- Relay -->
+<!-- Final Relay -->
 <div class="section">
-    <div class="section-label">Relay</div>
+    <div class="section-label">Final Relay</div>
     <div class="card">
         <table class="relay-table">
             <thead>
@@ -323,6 +288,7 @@ tr:hover td {
                     <th>3rd</th>
                     <th>4th</th>
                     <th>5th</th>
+                    <th>6th</th>
                     <th>delete</th>
                 </tr>
             </thead>
@@ -330,17 +296,131 @@ tr:hover td {
         </table>
     </div>
     <div class="save-row">
-        <button class="btn btn-dark" onclick="saveRelay()">保存</button>
+        <button class="btn btn-dark" onclick="saveRelay()">Final Relay保存</button>
     </div>
 </div>
 
 <script>
 let relayData = [];
+let cultureData = [];
+let sportsData = [];
+
+async function loadCulture() {
+    const res = await fetch("/api/culture_load");
+    cultureData = await res.json();
+    renderCulture();
+}
+
+async function loadSports() {
+    const res = await fetch("/api/sports_load");
+    sportsData = await res.json();
+    renderSports();
+}
 
 async function loadRelay() {
     const res = await fetch("/api/relay_load");
     relayData = await res.json();
     renderRelay();
+}
+
+function renderCulture() {
+    const tbody = document.getElementById("culture-body");
+    tbody.innerHTML = "";
+
+    cultureData.forEach((team, index) => {
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+            <td>${team.id}</td>
+            <td><input value="${team.team_name || ''}"
+                onchange="updateCulture(${index}, 'team_name', this.value)"></td>
+
+            <td><input value="${team.first || ''}"
+                onchange="updateCulture(${index}, 'first', this.value)"></td>
+
+            <td><input value="${team.second || ''}"
+                onchange="updateCulture(${index}, 'second', this.value)"></td>
+
+            <td><input value="${team.third || ''}"
+                onchange="updateCulture(${index}, 'third', this.value)"></td>
+
+            <td><input value="${team.fourth || ''}"
+                onchange="updateCulture(${index}, 'fourth', this.value)"></td>
+
+            <td><input value="${team.fifth || ''}"
+                onchange="updateCulture(${index}, 'fifth', this.value)"></td>
+
+            <td><input value="${team.sixth || ''}"
+                onchange="updateCulture(${index}, 'sixth', this.value)"></td>
+
+            <td>
+                <button class="btn btn-green"
+                    onclick="addRelayFromCulture(${index})">
+                    追加
+                </button>
+            </td>
+        `;
+
+        tbody.appendChild(tr);
+    });
+}
+
+function updateCulture(index, key, value) {
+    cultureData[index][key] = value;
+}
+
+function addRelayFromCulture(index) {
+    addRelay({...cultureData[index]});
+}
+
+function renderSports() {
+    const tbody = document.getElementById("sports-body");
+    tbody.innerHTML = "";
+
+    sportsData.forEach((team, index) => {
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+            <td>${team.id}</td>
+            <td><input value="${team.team_name || ''}"
+                onchange="updateSports(${index}, 'team_name', this.value)"></td>
+
+            <td><input value="${team.first || ''}"
+                onchange="updateSports(${index}, 'first', this.value)"></td>
+
+            <td><input value="${team.second || ''}"
+                onchange="updateSports(${index}, 'second', this.value)"></td>
+
+            <td><input value="${team.third || ''}"
+                onchange="updateSports(${index}, 'third', this.value)"></td>
+
+            <td><input value="${team.fourth || ''}"
+                onchange="updateSports(${index}, 'fourth', this.value)"></td>
+
+            <td><input value="${team.fifth || ''}"
+                onchange="updateSports(${index}, 'fifth', this.value)"></td>
+
+            <td><input value="${team.sixth || ''}"
+                onchange="updateSports(${index}, 'sixth', this.value)"></td>
+
+            <td>
+                <button class="btn btn-green"
+                    onclick="addRelayFromSports(${index})">
+                    追加
+                </button>
+            </td>
+        `;
+
+        tbody.appendChild(tr);
+    });
+}
+
+function updateSports(index, key, value) {
+    sportsData[index][key] = value;
+}
+
+function addRelayFromSports(index) {
+    addRelay({...sportsData[index]});
 }
 
 function renderRelay() {
@@ -356,7 +436,7 @@ function renderRelay() {
 
     relayData.forEach((team, index) => {
         const tr = document.createElement("tr");
-        const fields = ['team_name','first','second','third','fourth','fifth'];
+        const fields = ['team_name','first','second','third','fourth','fifth','sixth'];
         const cells = fields.map(f => `
             <td>
                 <input value="${team[f] ?? ''}"
@@ -385,13 +465,32 @@ function deleteRelay(index) {
     renderRelay();
 }
 
+async function saveCulture() {
+    await fetch("/api/culture_save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items: cultureData })
+    });
+
+    alert("CultureClubを保存しました");
+}
+
+async function saveSports() {
+    await fetch("/api/sports_save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items: sportsData })
+    });
+    alert("SportsClubを保存しました");
+}
+
 async function saveRelay() {
     await fetch("/api/relay_save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ category: "relay", items: relayData })
     });
-    alert("Relayを保存しました");
+    alert("Final Relayを保存しました");
 }
 
 async function saveCategory(category) {
@@ -411,6 +510,8 @@ async function loadCategory() {
         data.category_name + "（" + data.category + "）";
 }
 
+loadCulture();
+loadSports();
 loadRelay();
 loadCategory();
 </script>

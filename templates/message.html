@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>メッセージエディタ</title>
+<title>/message</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/message.css') }}">
 </head>
 
@@ -18,7 +18,11 @@
 <div id="menu" class="menu">
     <div onclick="execCmd('bold')">赤</div>
     <div onclick="execCmd('green')">緑</div>
-    <div onclick="execCmd('orange')">オレンジ</div>
+    <div onclick="execCmd('blue')">青</div>
+    <div onclick="execCmd('newsflash')">速報</div>
+    <div onclick="execCmd('notice')">お知らせ</div>
+    <div onclick="execCmd('letter')">おたより</div>
+    <div onclick="execCmd('em-dash')">ダッシュ ────</div>
 </div>
 
 <script src="{{ url_for('static', filename='js/message.js') }}"></script>

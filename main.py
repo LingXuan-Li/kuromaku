@@ -16,6 +16,7 @@ db = peewee.SqliteDatabase(DB_PATH)
 GAME_PATH = "data/tournaments.csv"
 CULTURE_CLUB_PATH = "data/culture_club.csv"
 SPORTS_CLUB_PATH = "data/sports_club.csv"
+CLASS_RELAY_PATH = "data/class_relay.csv"
 
 MESSAGE_INDEX = 0
 
@@ -64,6 +65,7 @@ class CultureClub(BaseModel):
     third = peewee.CharField()
     fourth = peewee.CharField()
     fifth = peewee.CharField()
+    sixth = peewee.CharField()
 
     class Meta:
         table_name = "culture_club"
@@ -75,6 +77,7 @@ class SportsClub(BaseModel):
     third = peewee.CharField()
     fourth = peewee.CharField()
     fifth = peewee.CharField()
+    sixth = peewee.CharField()
 
     class Meta:
         table_name = "sports_club"
@@ -86,6 +89,7 @@ class Relay(BaseModel):
     third = peewee.CharField()
     fourth = peewee.CharField()
     fifth = peewee.CharField()
+    sixth = peewee.CharField()
 
     class Meta:
         table_name = "relay"
@@ -97,10 +101,47 @@ class Category(BaseModel):
     class Meta:
         table_name = "category"
 
+class ClassRelay(BaseModel):
+    team_name = peewee.CharField()
+    first = peewee.CharField()
+    second = peewee.CharField()
+    third = peewee.CharField()
+    fourth = peewee.CharField()
+    fifth = peewee.CharField()
+    sixth = peewee.CharField()
+    seventh = peewee.CharField()
+    eighth = peewee.CharField()
+    ninth = peewee.CharField()
+    tenth = peewee.CharField()
+
+    class Meta:
+        table_name = "class_relay"
+
+
+class PageStyle(BaseModel):
+    style = peewee.CharField()
+    style_name = peewee.TextField()
+
+    class Meta:
+        table_name = "page_style"
+
+MODELS = [
+    Tournament,
+    TournamentProgress,
+    Message,
+    DashboardData,
+    CultureClub,
+    SportsClub,
+    Relay,
+    Category,
+    ClassRelay,
+    PageStyle
+]
+
 # DB初期化
 def init_db():
     with db:
-        db.create_tables([Tournament,TournamentProgress, Message, DashboardData, CultureClub, SportsClub, Relay, Category])
+        db.create_tables(MODELS)
 
 # CSV初期投入
 def init_games_from_csv():
@@ -130,7 +171,8 @@ def init_relay_from_csv():
                 second=row['second'],
                 third=row['third'],
                 fourth=row['fourth'],
-                fifth=row['fifth']
+                fifth=row['fifth'],
+                sixth=row['sixth']
             )
 
     with open(SPORTS_CLUB_PATH, newline='', encoding='utf-8') as csvfile:
@@ -142,15 +184,41 @@ def init_relay_from_csv():
                 second=row['second'],
                 third=row['third'],
                 fourth=row['fourth'],
-                fifth=row['fifth']
+                fifth=row['fifth'],
+                sixth=row['sixth']
+            )
+
+    with open(CLASS_RELAY_PATH, newline='', encoding='utf-8') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            ClassRelay.create(
+                team_name=row['team_name'],
+                first=row['first'],
+                second=row['second'],
+                third=row['third'],
+                fourth=row['fourth'],
+                fifth=row['fifth'],
+                sixth=row['sixth'],
+                seventh=row['seventh'],
+                eighth=row['eighth'],
+                ninth=row['ninth'],
+                tenth=row['tenth']
             )
 
 def init_category():
     if not Category.select().where(Category.id == 1).exists():
         Category.create(
             id=1,
-            category="None",
-            category_name="未設定"
+            category="culture",
+            category_name="文化部予選"
+        )
+
+def init_page_style():
+    if not PageStyle.select().where(PageStyle.id == 1).exists():
+        PageStyle.create(
+            id=1,
+            style="tournament",
+            style_name="トーナメント"
         )
 
 # ゲーム取得
@@ -173,7 +241,6 @@ def save_message(data):
         for msg in messages:
             Message.create(message=msg)
 
-
 def load_message():
     messages = (Message
                 .select()
@@ -183,13 +250,20 @@ def load_message():
 def message_parse(text: str) -> str:
     text = re.sub(r'\*\*(.*?)\*\*', r'<span style="color: #f01000;">\1</span>', text)
     text = re.sub(r'\$\$(.*?)\$\$', r'<span style="color: #61c802;">\1</span>', text)
-    text = re.sub(r'\@\@(.*?)\@\@', r'<span style="color: orange;">\1</span>', text)
+    text = re.sub(r'\@\@(.*?)\@\@', r'<span style="color: #666ae1;">\1</span>', text)
+
+    text = f'<span style="color: orange;">{text}</span>'
     return text
 
 # ダッシュボード
 @app.route("/")
 def index():
     return render_template("dashboard.html")
+
+@app.route("/api/page_style")
+def page_style():
+    style = PageStyle.get_by_id(1)
+    return jsonify({ "style": style.style })
 
 def build_for_col(col_index):
     dashboard_data = get_games(col_index)
@@ -229,11 +303,6 @@ def api_dashboard():
         dashboard[col_name] = build_for_col(col_index)
 
     return jsonify(dashboard)
-
-@app.route("/api/relay")
-def api_relay():
-    relay_teams = [model_to_dict(t) for t in Relay.select()]
-    return jsonify(relay_teams)
 
 @app.route("/api/info")
 def api_info():
@@ -298,53 +367,115 @@ def save_matches():
 # リレーエディタ
 @app.route("/relay_editor")
 def relay_editor():
-    culture_club = CultureClub.select().order_by(CultureClub.id.asc())
-    sports_club = SportsClub.select().order_by(SportsClub.id.asc())
-    print("Culture Club:", [c.__data__ for c in culture_club])
-    print("Sports Club:", [s.__data__ for s in sports_club])
-    return render_template("relay.html", culture_club=culture_club, sports_club=sports_club)
+    # print("Culture Club:", [c.__data__ for c in culture_club])
+    # print("Sports Club:", [s.__data__ for s in sports_club])
+    return render_template("relay.html")
+
+@app.route("/api/culture_load", methods=["GET"])
+def culture_load():
+    culture = CultureClub.select().order_by(CultureClub.id.asc())
+    return jsonify([model_to_dict(c) for c in culture])
+
+@app.route("/api/sports_load", methods=["GET"])
+def sports_load():
+    sports = SportsClub.select().order_by(SportsClub.id.asc())
+    return jsonify([model_to_dict(s) for s in sports])
 
 @app.route("/api/relay_load", methods=["GET"])
 def relay_load():
     relay = Relay.select().order_by(Relay.id.asc())
-    return jsonify([model_to_dict(relay) for relay in relay])
+    return jsonify([model_to_dict(r) for r in relay])
+
+@app.route("/api/culture_save", methods=["POST"])
+def culture_save():
+    data = request.get_json(silent=True) or {}
+
+    with db.atomic():
+        CultureClub.delete().execute()
+
+        items = data.get("items", [])
+
+        if items:
+            CultureClub.insert_many([
+                {
+                    "team_name": item.get("team_name", ""),
+                    "first": item.get("first", ""),
+                    "second": item.get("second", ""),
+                    "third": item.get("third", ""),
+                    "fourth": item.get("fourth", ""),
+                    "fifth": item.get("fifth", ""),
+                    "sixth": item.get("sixth", "")
+                }
+                for item in items
+            ]).execute()
+
+    return jsonify({"status": "ok"})
+
+@app.route("/api/sports_save", methods=["POST"])
+def sports_save():
+    data = request.get_json(silent=True) or {}
+    print(data)
+
+    with db.atomic():
+        SportsClub.delete().execute()
+
+        items = data.get("items", [])
+
+        if items:
+            SportsClub.insert_many([
+                {
+                    "team_name": item.get("team_name", ""),
+                    "first": item.get("first", ""),
+                    "second": item.get("second", ""),
+                    "third": item.get("third", ""),
+                    "fourth": item.get("fourth", ""),
+                    "fifth": item.get("fifth", ""),
+                    "sixth": item.get("sixth", "")
+                }
+                for item in items
+            ]).execute()
+
+    return jsonify({"status": "ok"})
 
 @app.route("/api/relay_save", methods=["POST"])
 def relay_save():
-    data = request.get_json(silent=True) or []
-    if data.get("category") == "culture":
+    data = request.get_json(silent=True) or {}
+    category = data.get("category")
+
+    if category == "culture":
         model = CultureClub
-    elif data.get("category") == "sports":
+
+    elif category == "sports":
         model = SportsClub
-    elif data.get("category") == "relay":
-        model = [
-            {
-                "team_name": data.get("team_name", ""),
-                "first": data.get("first", ""),
-                "second": data.get("second", ""),
-                "third": data.get("third", ""),
-                "fourth": data.get("fourth", ""),
-                "fifth": data.get("fifth", ""),
-                "sixth": data.get("sixth", "")
-            }
-        ]
+
+    elif category == "relay":
+        model = Relay
+
     else:
-        return jsonify({"status": "error", "message": "Invalid category"}), 400
+        return jsonify({
+            "status": "error",
+            "message": "Invalid category"
+        }), 400
 
     with db.atomic():
         model.delete().execute()
-        if isinstance(model, list):
-            Relay.insert_many(model).execute()
-        else:
-            for item in data.get("items", []):
-                model.create(
-                    team_name=item.get("team_name", ""),
-                    first=item.get("first", ""),
-                    second=item.get("second", ""),
-                    third=item.get("third", ""),
-                    fourth=item.get("fourth", ""),
-                    fifth=item.get("fifth", ""),
-                )
+
+        items = data.get("items", [])
+
+        if items:
+            model.insert_many([
+                {
+                    "team_name": item.get("team_name", ""),
+                    "first": item.get("first", ""),
+                    "second": item.get("second", ""),
+                    "third": item.get("third", ""),
+                    "fourth": item.get("fourth", ""),
+                    "fifth": item.get("fifth", ""),
+                    "sixth": item.get("sixth", "")
+                }
+                for item in items
+            ]).execute()
+
     return jsonify({"status": "ok"})
 
 @app.route("/api/category_save", methods=["POST"])
@@ -356,11 +487,11 @@ def category_save():
         if category == "culture":
             category_name = "文化部予選"
         elif category == "sports":
-            category_name = "体育部予選"
+            category_name = "運動部予選"
         elif category == "relay":
             category_name = "本戦"
-        elif category == "hidden":
-            category_name = "非表示"
+        # elif category == "hidden":
+        #     category_name = "非表示"
         else:
             category_name = ""
 
@@ -373,11 +504,78 @@ def category_save():
 def category_load():
 
     category = Category.get_by_id(1)
-    print("Current Category:", category.category, category.category_name)
+    # print("Current Category:", category.category, category.category_name)
 
     return jsonify({
         "category": category.category,
         "category_name": category.category_name
+    })
+
+@app.route("/api/relay_data", methods=["GET"])
+def relay_data():
+    category = Category.get_by_id(1)
+
+    if category.category == "culture":
+        items = list(CultureClub.select().dicts())
+    elif category.category == "sports":
+        items = list(SportsClub.select().dicts())
+    elif category.category == "relay":
+        items = list(Relay.select().dicts())
+    else:
+        items = []
+    
+    return jsonify({
+        "category": category.category,
+        "category_name": category.category_name,
+        "items": items
+    })
+
+# クラス対抗リレーエディタ
+@app.route("/class_relay")
+def class_relay():
+    return render_template("class_relay.html")
+
+@app.route("/api/class_relay_save", methods=["POST"])
+def class_relay_save():
+    data = request.get_json(silent=True) or {}
+    print(data)
+
+    with db.atomic():
+        ClassRelay.delete().execute()
+
+        items = data.get("items", [])
+
+        if items:
+            ClassRelay.insert_many([
+                {
+                    "team_name": item.get("team_name", ""),
+                    "first": item.get("first", ""),
+                    "second": item.get("second", ""),
+                    "third": item.get("third", ""),
+                    "fourth": item.get("fourth", ""),
+                    "fifth": item.get("fifth", ""),
+                    "sixth": item.get("sixth", ""),
+                    "seventh": item.get("seventh", ""),
+                    "eighth": item.get("eighth", ""),
+                    "ninth": item.get("ninth", ""),
+                    "tenth": item.get("tenth", "")
+                }
+                for item in items
+            ]).execute()
+
+    return jsonify({"status": "ok"})
+
+@app.route("/api/class_relay_load", methods=["GET"])
+def class_relay_load():
+    relay = ClassRelay.select().order_by(ClassRelay.id.asc())
+    return jsonify([model_to_dict(r) for r in relay])
+
+@app.route("/api/class_relay_data", methods=["GET"])
+def class_relay_data():
+    items = list(ClassRelay.select().dicts())
+    print(items)
+    return jsonify({
+        "items": items
     })
 
 # メッセージエディタ
@@ -407,6 +605,58 @@ def message():
     message = load_message()
     return render_template("message.html", message=message)
 
+@app.route("/page_changer")
+def page_changer():
+    return render_template("page_changer.html")
+
+@app.route("/api/page_style_save", methods=["POST"])
+def page_style_save():
+    data = request.get_json(silent=True) or {}
+    
+    with db.atomic():
+        style = data.get("style", "")
+        if style == "opening":
+            style_name = "開会式"
+        elif style == "1G-game":
+            style_name = "1学年競技"
+        elif style == "2G-game":
+            style_name = "2学年競技"
+        elif style == "3G-game":
+            style_name = "3学年競技"
+        elif style == "4G-game":
+            style_name = "4学年競技"
+        elif style == "5G-game":
+            style_name = "5学年競技"
+        elif style == "jump":
+            style_name = "大縄跳び"
+        elif style == "lunch":
+            style_name = "昼休憩"
+        elif style == "tournament":
+            style_name = "トーナメント"
+        elif style == "club_relay":
+            style_name = "部活対抗リレー"
+        elif style == "class_relay":
+            style_name = "クラス対抗リレー"
+        elif style == "closing":
+            style_name = "閉会式"
+        else:
+            style_name = ""
+
+        PageStyle.update(style=style).where(PageStyle.id == 1).execute()
+        PageStyle.update(style_name=style_name).where(PageStyle.id == 1).execute()
+
+    return jsonify({"status": "ok"})
+
+@app.route("/api/page_style_load", methods=["GET"])
+def page_style_load():
+
+    style = PageStyle.get_by_id(1)
+
+    return jsonify({
+        "style": style.style,
+        "style_name": style.style_name
+    })
+
 @app.route("/admin")
 def admin():
     routes = sorted([f"{rule.endpoint} → {rule.rule}" for rule in app.url_map.iter_rules()])
@@ -425,6 +675,77 @@ def check():
     print("Message:", message)
     return render_template("check.html", message=message, tournaments=tonaments)
 
+@app.route("/db")
+def db_view():
+
+    html = """
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <title>DB Viewer</title>
+        <style>
+            body {
+                font-family: sans-serif;
+                margin: 20px;
+            }
+
+            table {
+                border-collapse: collapse;
+                margin-bottom: 40px;
+                width: 100%;
+            }
+
+            th, td {
+                border: 1px solid #ccc;
+                padding: 4px 8px;
+            }
+
+            th {
+                background: #eee;
+            }
+
+            h2 {
+                margin-top: 50px;
+            }
+        </style>
+    </head>
+    <body>
+    """
+
+    for model in MODELS:
+
+        html += f"<h2>{model.__name__}</h2>"
+
+        rows = list(model.select().dicts())
+
+        if not rows:
+            html += "<p>データなし</p>"
+            continue
+
+        columns = rows[0].keys()
+
+        html += "<table>"
+        html += "<tr>"
+
+        for col in columns:
+            html += f"<th>{col}</th>"
+
+        html += "</tr>"
+
+        for row in rows:
+            html += "<tr>"
+
+            for col in columns:
+                html += f"<td>{row[col]}</td>"
+
+            html += "</tr>"
+
+        html += "</table>"
+
+    html += "</body></html>"
+
+    return html
+
 # アプリ終了API（テスト用）
 @app.route("/exit")
 def exit_app():
@@ -437,6 +758,7 @@ if __name__ == "__main__":
     init_games_from_csv()
     init_relay_from_csv()
     init_category()
+    init_page_style()
     print(f"Starting server on port {PORT}...")
     print(f"Access the admin panel at http://localhost:{PORT}/admin")
     app.run(debug=DEBUG, port=PORT)

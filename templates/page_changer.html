@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>/page_changer</title>
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: monospace;
+    background: #f5f5f2;
+    padding: 2rem;
+    color: #1a1a1a;
+    line-height: 1.5;
+}
+
+/* ── HEADER ── */
+.header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #e0e0d8;
+    padding-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.header h1 {
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.badge {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    display: inline-block;
+}
+.badge-green  { background: #d1fae5; color: #065f46; }
+.badge-blue   { background: #eff6ff; color: #1d4ed8; }
+.badge-amber  { background: #fef3c7; color: #92400e; }
+
+/* ── SECTION ── */
+.section {
+    margin-bottom: 2rem;
+}
+
+.section-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: #888;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+/* ── CARD ── */
+.card {
+    background: #fff;
+    border: 1px solid #e8e8e2;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* ── TABLE ── */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 500;
+    color: #888;
+    padding: 6px 10px;
+    border-bottom: 1px solid #e8e8e2;
+    background: #fafaf8;
+}
+
+td {
+    padding: 7px 10px;
+    border-bottom: 1px solid #f0f0ec;
+    font-size: 13px;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+tr:hover td {
+    background: #fafaf8;
+}
+
+/* ── RELAY TABLE INPUTS ── */
+.relay-table td {
+    padding: 5px 6px;
+}
+
+.relay-table input {
+    width: 100%;
+    border: 1px solid #e8e8e2;
+    border-radius: 4px;
+    padding: 4px 6px;
+    font-family: monospace;
+    font-size: 12px;
+    background: #fff;
+    color: #1a1a1a;
+    transition: border-color .15s;
+}
+
+.relay-table input:focus {
+    outline: none;
+    border-color: #aaa;
+}
+
+/* ── BUTTONS ── */
+.btn {
+    border: 1px solid #e8e8e2;
+    background: #fff;
+    color: #1a1a1a;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: monospace;
+    font-size: 11px;
+    transition: background .1s;
+}
+.btn:hover { background: #f0f0ec; }
+
+.btn-dark {
+    background: #1a1a1a;
+    color: #fff;
+    border-color: #1a1a1a;
+}
+.btn-dark:hover { background: #333; border-color: #333; }
+
+.btn-green {
+    background: #d1fae5;
+    color: #065f46;
+    border-color: #6ee7b7;
+}
+.btn-green:hover { background: #a7f3d0; }
+
+.btn-red {
+    background: #fff;
+    color: #991b1b;
+    border-color: #fecaca;
+}
+.btn-red:hover { background: #fee2e2; }
+
+/* ── STYLE PANEL ── */
+.style-panel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+    padding: 10px 14px;
+    background: #fff;
+    border: 1px solid #e8e8e2;
+    border-radius: 8px;
+}
+
+.style-label {
+    font-size: 11px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-right: 4px;
+}
+
+#current-style {
+    font-size: 12px;
+    font-weight: 500;
+    color: #1a1a1a;
+    margin-right: 12px;
+}
+
+.style-divider {
+    width: 1px;
+    height: 16px;
+    background: #e8e8e2;
+    margin: 0 4px;
+}
+
+/* ── SAVE ROW ── */
+.save-row {
+    margin-top: 10px;
+}
+
+/* ── CARDS ── */
+.card-grid {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.card {
+    width: 400px;
+    background: #fff;
+    border: 1px solid #e8e8e2;
+    border-radius: 8px;
+    padding: 1.25rem 1.25rem 1rem;
+    cursor: pointer;
+    transition: border-color .15s, box-shadow .15s;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.card:hover {
+    border-color: #aaa;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+}
+
+.card-path {
+    font-size: 15px;
+    font-weight: 500;
+    color: #1a1a1a;
+    margin-bottom: 6px;
+}
+
+.card-desc {
+    font-size: 11px;
+    color: #888;
+}
+
+.card-arrow {
+    font-size: 11px;
+    color: #ccc;
+    margin-top: 1.5rem;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+    <h1>/page_changer</h1>
+    <span class="badge badge-green">dev only</span>
+</div>
+
+<div class="section">
+    <span class="section-label">Information</span>
+    <p>Page Styleセクションでページスタイルを変更すると、Current Guideセクションに表示中の案内編集ページへの遷移ボタン(別タブ)が開きます。</p>
+</div>
+
+<!-- 頁スタイル切替 -->
+<div class="style-panel">
+    <span class="style-label">Page Style</span>
+    <span id="current-style">読み込み中...</span>
+    <div class="style-divider"></div>
+    <button class="btn btn-green" onclick="savePageStyle('opening')">開会式</button>
+    <button class="btn btn-green" onclick="savePageStyle('1G-game')">1学年競技（玉入れ）</button>
+    <button class="btn btn-green" onclick="savePageStyle('2G-game')">2学年競技（ムカデ競争）</button>
+    <button class="btn btn-green" onclick="savePageStyle('3G-game')">3学年競技（中当て）</button>
+    <button class="btn btn-green" onclick="savePageStyle('4G-game')">4学年競技（台風の目）</button>
+    <button class="btn btn-green" onclick="savePageStyle('5G-game')">5学年競技（綱引き）</button>
+    <button class="btn btn-green" onclick="savePageStyle('jump')">大縄跳び</button>
+    <button class="btn btn-green" onclick="savePageStyle('lunch')">昼休憩</button>
+    <button class="btn btn-green" onclick="savePageStyle('tournament')">トーナメント</button>
+    <button class="btn btn-green" onclick="savePageStyle('club_relay')">部活対抗リレー</button>
+    <button class="btn btn-green" onclick="savePageStyle('class_relay')">クラス対抗リレー</button>
+    <button class="btn btn-green" onclick="savePageStyle('closing')">閉会式</button>
+</div>
+
+<div class="section">
+    <span class="section-label">Current Guide</span>
+    <div id="card-guide"></div>
+</div>
+
+<div class="section">
+    <span class="style-label">Editors Path</span>
+
+    <div class="card-grid">
+    <a href="/tournaments_editor" target="_blank" rel="noopener noreferrer" class="card">
+        <div class="card-path">/tournaments_editor (トーナメント)</div>
+        <div class="card-desc">トーナメント編集画面を新しいタブで開く</div>
+
+        <div class="card-arrow">↗ OPEN IN NEW TAB</div>
+    </a>
+
+    <a href="/relay_editor" target="_blank" rel="noopener noreferrer" class="card">
+        <div class="card-path">/relay_editor (部活対抗リレー)</div>
+        <div class="card-desc">部活対抗リレー編集画面を新しいタブで開く</div>
+
+        <div class="card-arrow">↗ OPEN IN NEW TAB</div>
+    </a>
+
+    <a href="/class_relay" target="_blank" rel="noopener noreferrer" class="card">
+        <div class="card-path">/class_relay (クラス対抗リレー)</div>
+        <div class="card-desc">クラス対抗リレー編集画面を新しいタブで開く</div>
+
+        <div class="card-arrow">↗ OPEN IN NEW TAB</div>
+    </a>
+
+    <a href="/admin" target="_blank" rel="noopener noreferrer" class="card">
+        <div class="card-path">/admin (管理者画面・リンク集)</div>
+        <div class="card-desc">管理者画面を新しいタブで開く</div>
+
+        <div class="card-arrow">↗ OPEN IN NEW TAB</div>
+    </a>
+
+    <a href="/message" target="_blank" rel="noopener noreferrer" class="card">
+        <div class="card-path">/message (メッセージエディタ)</div>
+        <div class="card-desc">メッセージ編集画面を新しいタブで開く</div>
+
+        <div class="card-arrow">↗ OPEN IN NEW TAB</div>
+    </a>
+    </div>
+</div>
+
+<script>
+const guides = {
+    opening: {
+        url: "#",
+        title: "開会式"
+    },
+    "1G-game": {
+        url: "#",
+        title: "1学年競技（玉入れ）"
+    },
+    "2G-game": {
+        url: "#",
+        title: "2学年競技（ムカデ競争）"
+    },
+    "3G-game": {
+        url: "#",
+        title: "3学年競技（中当て）"
+    },
+    "4G-game": {
+        url: "#",
+        title: "4学年競技（台風の目）"
+    },
+    "5G-game": {
+        url: "#",
+        title: "5学年競技（綱引き）"
+    },
+    jump: {
+        url: "#",
+        title: "大縄跳び"
+    },
+    lunch: {
+        url: "#",
+        title: "昼休憩"
+    },
+    closing: {
+        url: "#",
+        title: "閉会式"
+    },
+    tournament: {
+        url: "/tournaments_editor",
+        title: "トーナメント"
+    },
+    club_relay: {
+        url: "/relay_editor",
+        title: "部活対抗リレー"
+    },
+    class_relay: {
+        url: "/class_relay",
+        title: "クラス対抗リレー"
+    }
+};
+
+async function savePageStyle(style) {
+    await fetch("/api/page_style_save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ style })
+    });
+    await loadPageStyle();
+    alert(`ダッシュボード表示を ${guides[style].title} (${style}) に切り替えました`);
+}
+
+async function loadPageStyle() {
+    const res = await fetch("/api/page_style_load");
+    const data = await res.json();
+    document.getElementById("current-style").innerText =
+        data.style_name + "（" + data.style + "）";
+
+    document.getElementById("card-guide").innerHTML = `
+        <a href="${guides[data.style].url}"
+           target="_blank"
+           rel="noopener noreferrer"
+           class="card">
+
+            <div class="card-path">${guides[data.style].url} (${guides[data.style].title})</div>
+
+            <div class="card-desc">
+                ${guides[data.style].title}編集画面を新しいタブで開く
+            </div>
+
+            <div class="card-arrow">
+                ↗ OPEN IN NEW TAB
+            </div>
+        </a>
+    `;
+}
+
+loadPageStyle();
+</script>
+</body>
+</html>

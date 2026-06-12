@@ -341,11 +341,19 @@
 
 <script>
 const BOX_POS = {
-  R1L:   {x:117, y:90},
-  R1R:   {x:283, y:90},
-  SemiL: {x:54,  y:42},
-  SemiR: {x:346, y:42},
-  Final: {x:200, y:4},
+  R1L: {x: 40,  y: 200},
+  R1C: {x: 200, y: 200},
+  R1R: {x: 360, y: 200},
+
+  SF1: {
+    x: (40 + 200) / 2,
+    y: 110
+  },
+
+  Final: {
+    x: ((40 + 200) / 2 + 360) / 2,
+    y: 20
+  }
 };
 
 function isEliminated(tNum, seed) {
@@ -497,8 +505,40 @@ function removeFromSchedule(uid) {
 
 function setStatus(uid, status) {
   pushHistory();
+
   const item = S.schedule.find(s => s.uid === uid);
-  if (item) item.status = status;
+  if (!item) return;
+
+  const sameCol = S.schedule
+    .filter(s => s.col === item.col)
+    .sort((a, b) => a.order - b.order); // 上→下
+
+  // currentが選ばれたときだけ特別処理
+  if (status === 'current') {
+
+    let passed = false;
+
+    for (const s of sameCol) {
+      if (s.uid === uid) {
+        s.status = 'current';
+        passed = true;
+      } 
+      else if (!passed) {
+        // 上側 → 終了扱い
+        s.status = 'done';
+      } 
+      else {
+        // 下側 → 未
+        s.status = 'pending';
+      }
+    }
+
+  } else {
+    // 通常更新（current以外はそのまま）
+    item.status = status;
+  }
+
+  S.dirty = true;
   render();
 }
 
@@ -654,7 +694,7 @@ function setWinner(tNum, matchId, seed) {
   render();
 }
 
-/* ═══════════════ LOGIC（既存そのまま） ═══════════════ */
+/* ═══════════════ LOGIC ═══════════════ */
 
 function getTNums() {
   return [...new Set(DATA.map(d=>d.tournament_number))].sort((a,b)=>a-b);
@@ -667,20 +707,23 @@ function initTournament(num) {
   return {
     bySeed, gameName,
     matches:{
-      R1L:  {id:'R1L',  label:'1回戦', team1:bySeed[2],team2:bySeed[3],winner:null},
-      R1R:  {id:'R1R',  label:'1回戦', team1:bySeed[4],team2:bySeed[5],winner:null},
-      SemiL:{id:'SemiL',label:'準決勝',team1:bySeed[1],team2:null,     winner:null},
-      SemiR:{id:'SemiR',label:'準決勝',team1:null,     team2:bySeed[6],winner:null},
-      Final:{id:'Final',label:'決勝',  team1:null,     team2:null,     winner:null},
+      R1L:  {id:'R1L',  label:'1回戦', team1:bySeed[1],team2:bySeed[2],winner:null},
+      R1C:  {id:'R1C',  label:'1回戦', team1:bySeed[3],team2:bySeed[4],winner:null},
+      R1R:  {id:'R1R',  label:'1回戦', team1:bySeed[5],team2:bySeed[6],winner:null},
+      SF1: {id:'SF1',label:'準決勝', team1:null, team2:null, winner:null},
+      Final: {id:'Final',label:'決勝',  team1:null,     team2:null,     winner:null},
     }
   };
 }
 
 function propagate(t) {
-  t.matches.SemiL.team2 = t.matches.R1L.winner  || null;
-  t.matches.SemiR.team1 = t.matches.R1R.winner  || null;
-  t.matches.Final.team1 = t.matches.SemiL.winner || null;
-  t.matches.Final.team2 = t.matches.SemiR.winner || null;
+  // 準決勝
+  t.matches.SF1.team1 = t.matches.R1L.winner || null;
+  t.matches.SF1.team2 = t.matches.R1C.winner || null;
+
+  // 決勝
+  t.matches.Final.team1 = t.matches.SF1.winner || null;
+  t.matches.Final.team2 = t.matches.R1R.winner || null;
 }
 
 /* ═══════════════ RENDER ═══════════════ */
@@ -713,23 +756,61 @@ function renderTournament() {
   panel.appendChild(tabs);
 
   const container = el('div','bracket-container');
-  const svgNS='http://www.w3.org/2000/svg';
-  const svg=document.createElementNS(svgNS,'svg');
+
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgNS,'svg');
   svg.setAttribute('class','lines');
   svg.setAttribute('viewBox','0 0 530 262');
-  const g=document.createElementNS(svgNS,'g');
-  g.setAttribute('stroke','#0d2f6e'); g.setAttribute('stroke-width','3'); g.setAttribute('fill','none');
-  [
-    [132,262,132,178],[221,262,221,178],[132,178,221,178],[177,178,177,140],
-    [310,262,310,178],[399,262,399,178],[310,178,399,178],[355,178,355,140],
-    [43,262,43,140],[43,140,177,140],[110,140,110,80],
-    [355,140,488,140],[488,262,488,140],[421,140,421,80],
-    [110,80,421,80],[266,80,266,38],
-  ].forEach(([x1,y1,x2,y2])=>{
-    const ln=document.createElementNS(svgNS,'line');
-    ln.setAttribute('x1',x1);ln.setAttribute('y1',y1);ln.setAttribute('x2',x2);ln.setAttribute('y2',y2);
-    g.appendChild(ln);
-  });
+
+  const g = document.createElementNS(svgNS,'g');
+  g.setAttribute('stroke','#0d2f6e');
+  g.setAttribute('stroke-width','3');
+  g.setAttribute('fill','none');
+
+  const BOX_W = 130;
+  const BOX_H = 70;
+
+  function line(a, b) {
+    const ax = a.x + BOX_W / 2;
+    const ay = a.y + BOX_H / 2;
+
+    const bx = b.x + BOX_W / 2;
+    const by = b.y + BOX_H / 2;
+
+    const midX = (ax + bx) / 2;
+
+    // SVGは直線しかないので2本でL字を作る
+    const l1 = document.createElementNS(svgNS,'line');
+    l1.setAttribute('x1', ax);
+    l1.setAttribute('y1', ay);
+    l1.setAttribute('x2', midX);
+    l1.setAttribute('y2', ay);
+
+    const l2 = document.createElementNS(svgNS,'line');
+    l2.setAttribute('x1', midX);
+    l2.setAttribute('y1', ay);
+    l2.setAttribute('x2', midX);
+    l2.setAttribute('y2', by);
+
+    const l3 = document.createElementNS(svgNS,'line');
+    l3.setAttribute('x1', midX);
+    l3.setAttribute('y1', by);
+    l3.setAttribute('x2', bx);
+    l3.setAttribute('y2', by);
+
+    g.appendChild(l1);
+    g.appendChild(l2);
+    g.appendChild(l3);
+  }
+
+  // 1回戦 → SF1
+  line(BOX_POS.R1L, BOX_POS.SF1);
+  line(BOX_POS.R1C, BOX_POS.SF1);
+
+  // SF1 → Final
+  line(BOX_POS.SF1, BOX_POS.Final);
+  line(BOX_POS.R1R, BOX_POS.Final);
+
   svg.appendChild(g);
   container.appendChild(svg);
 
