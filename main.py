@@ -230,7 +230,8 @@ def get_games(col_index):
     return [dict(
         team_x=g.team_x,
         team_y=g.team_y,
-        game=g.game
+        game=g.game,
+        status=g.status
     ) for g in games]
 
 # メッセージ機能
@@ -267,6 +268,7 @@ def page_style():
 
 def build_for_col(col_index):
     dashboard_data = get_games(col_index)
+
     if not dashboard_data:
         return {
             "teamX": None,
@@ -277,17 +279,32 @@ def build_for_col(col_index):
             "gathering": None
         }
 
-    # statusはとりあえず無視して、常に先頭から3件を表示する形にする
-    current = dashboard_data[0]
-    idx = 0
+    current_idx = next(
+        (i for i, g in enumerate(dashboard_data) if g.get("status") == "current"),
+        None
+    )
 
-    nxt = dashboard_data[idx + 1] if idx + 1 < len(dashboard_data) else None
-    g = dashboard_data[idx + 2] if idx + 2 < len(dashboard_data) else None
+    if current_idx is None:
+        current = None
+        team_x = None
+        team_y = None
+        game = None
+        nxt = dashboard_data[0] if len(dashboard_data) > 0 else None
+        g = dashboard_data[1] if len(dashboard_data) > 1 else None
+
+    else:
+        current = dashboard_data[current_idx]
+        team_x = current.get("team_x")
+        team_y = current.get("team_y")
+        game = current.get("game")
+
+        nxt = dashboard_data[current_idx + 1] if current_idx + 1 < len(dashboard_data) else None
+        g = dashboard_data[current_idx + 2] if current_idx + 2 < len(dashboard_data) else None
 
     return {
-        "teamX": current.get("team_x"),
-        "teamY": current.get("team_y"),
-        "game": current.get("game"),
+        "teamX": team_x,
+        "teamY": team_y,
+        "game": game,
         "next": f'{nxt.get("team_x")} vs {nxt.get("team_y")}' if nxt else None,
         "next_game": nxt.get("game") if nxt else None,
         "gathering": f'{g.get("team_x")} ・ {g.get("team_y")}' if g else None
@@ -414,7 +431,7 @@ def culture_save():
 @app.route("/api/sports_save", methods=["POST"])
 def sports_save():
     data = request.get_json(silent=True) or {}
-    print(data)
+    # print(data)
 
     with db.atomic():
         SportsClub.delete().execute()
@@ -530,7 +547,7 @@ def relay_data():
         "items": items
     })
 
-# クラス対抗リレーエディタ
+# 選抜リレーエディタ
 @app.route("/class_relay")
 def class_relay():
     return render_template("class_relay.html")
@@ -538,7 +555,7 @@ def class_relay():
 @app.route("/api/class_relay_save", methods=["POST"])
 def class_relay_save():
     data = request.get_json(silent=True) or {}
-    print(data)
+    # print(data)
 
     with db.atomic():
         ClassRelay.delete().execute()
@@ -573,7 +590,7 @@ def class_relay_load():
 @app.route("/api/class_relay_data", methods=["GET"])
 def class_relay_data():
     items = list(ClassRelay.select().dicts())
-    print(items)
+    # print(items)
     return jsonify({
         "items": items
     })
@@ -636,7 +653,7 @@ def page_style_save():
         elif style == "club_relay":
             style_name = "部活対抗リレー"
         elif style == "class_relay":
-            style_name = "クラス対抗リレー"
+            style_name = "選抜リレー"
         elif style == "closing":
             style_name = "閉会式"
         else:
@@ -671,8 +688,8 @@ def helper():
 def check():
     message = load_message()
     tonaments = Tournament.select().order_by(Tournament.tournament_number.asc())
-    print("Tournaments:", [t.__data__ for t in tonaments])
-    print("Message:", message)
+    # print("Tournaments:", [t.__data__ for t in tonaments])
+    # print("Message:", message)
     return render_template("check.html", message=message, tournaments=tonaments)
 
 @app.route("/db")
