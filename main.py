@@ -210,7 +210,7 @@ def init_category():
         Category.create(
             id=1,
             category="culture",
-            category_name="文化部予選"
+            category_name="予選 文化部"
         )
 
 def init_page_style():
@@ -502,9 +502,9 @@ def category_save():
     with db.atomic():
         category = data.get("category", "")
         if category == "culture":
-            category_name = "文化部予選"
+            category_name = "予選 文化部"
         elif category == "sports":
-            category_name = "運動部予選"
+            category_name = "予選 運動部"
         elif category == "relay":
             category_name = "本戦"
         # elif category == "hidden":
