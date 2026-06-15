@@ -41,7 +41,7 @@ function updateField(prefix, d) {
     document.getElementById(`${prefix}-gathering`).textContent = d.gathering || "---";
 }
 
-setInterval(fetchDashboard, 3000);
+setInterval(fetchDashboard, 3000); //毎3.0秒
 fetchDashboard();
 
 async function loadClubRelay() {
@@ -131,8 +131,8 @@ async function loadClassRelay() {
 
 loadClubRelay();
 loadClassRelay();
-setInterval(loadClubRelay, 30000);
-setInterval(loadClassRelay, 30000);
+setInterval(loadClubRelay, 10000); //毎10.0秒
+setInterval(loadClassRelay, 10000); //毎10.0秒
 
 async function updatePageStyle() {
   const res = await fetch('/api/page_style');
@@ -149,7 +149,7 @@ async function updatePageStyle() {
 }
 
 updatePageStyle();
-setInterval(updatePageStyle, 10000);
+setInterval(updatePageStyle, 5000); //毎5.0秒
 
 
 

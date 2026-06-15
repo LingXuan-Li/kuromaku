@@ -683,85 +683,27 @@ def admin():
 def helper():
     return redirect(url_for("admin"))
 
-# TEST用のチェックAPI（ブラウザで動作確認するためのもの）
-@app.route("/check")
-def check():
-    message = load_message()
-    tonaments = Tournament.select().order_by(Tournament.tournament_number.asc())
-    # print("Tournaments:", [t.__data__ for t in tonaments])
-    # print("Message:", message)
-    return render_template("check.html", message=message, tournaments=tonaments)
-
+# DB確認
 @app.route("/db")
 def db_view():
 
-    html = """
-    <html>
-    <head>
-        <meta charset="utf-8">
-        <title>DB Viewer</title>
-        <style>
-            body {
-                font-family: sans-serif;
-                margin: 20px;
-            }
-
-            table {
-                border-collapse: collapse;
-                margin-bottom: 40px;
-                width: 100%;
-            }
-
-            th, td {
-                border: 1px solid #ccc;
-                padding: 4px 8px;
-            }
-
-            th {
-                background: #eee;
-            }
-
-            h2 {
-                margin-top: 50px;
-            }
-        </style>
-    </head>
-    <body>
-    """
+    data = []
 
     for model in MODELS:
-
-        html += f"<h2>{model.__name__}</h2>"
-
         rows = list(model.select().dicts())
 
-        if not rows:
-            html += "<p>データなし</p>"
-            continue
+        if rows:
+            columns = list(rows[0].keys())
+        else:
+            columns = []
 
-        columns = rows[0].keys()
+        data.append({
+            "name": model.__name__,
+            "rows": rows,
+            "columns": columns
+        })
 
-        html += "<table>"
-        html += "<tr>"
-
-        for col in columns:
-            html += f"<th>{col}</th>"
-
-        html += "</tr>"
-
-        for row in rows:
-            html += "<tr>"
-
-            for col in columns:
-                html += f"<td>{row[col]}</td>"
-
-            html += "</tr>"
-
-        html += "</table>"
-
-    html += "</body></html>"
-
-    return html
+    return render_template("db.html", data=data)
 
 # アプリ終了API（テスト用）
 @app.route("/exit")

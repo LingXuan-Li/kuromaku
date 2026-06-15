@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>/db</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/db.css') }}">
+</head>
+<body>
+<div class="header">
+    <h1>/db</h1>
+    <span class="badge badge-green">dev only</span>
+</div>
+<div class="section">
+    <div class="section-label">DATABASE SYNC & RELOAD</div>
+        <a href="/db">
+        <button class="btn btn-green">
+            DATABASE SYNC & RELOAD
+        </button>
+        </a>
+</div>
+
+{% for model in data %}
+    <div class="section">
+    <div class="section-label">{{ model.name }}</div>
+
+    <div class="card">
+    <table class="relay-table">
+    {% if not model.rows %}
+        <p>データなし</p>
+    {% else %}
+            <thead>
+            <tr>
+                {% for col in model.columns %}
+                    <th>{{ col }}</th>
+                {% endfor %}
+            </tr>
+            </thead>
+
+            {% for row in model.rows %}
+                <tbody>
+                <tr>
+                    {% for col in model.columns %}
+                        <td>{{ row[col] }}</td>
+                    {% endfor %}
+                </tr>
+                </tbody>
+            {% endfor %}
+        </table>
+    {% endif %}
+    </div>
+    </div>
+    </div>
+{% endfor %}
+
+</body>
+</html>

@@ -1,0 +1,232 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: monospace;
+    background: #f5f5f2;
+    padding: 2rem;
+    color: #1a1a1a;
+    line-height: 1.5;
+}
+
+/* ── HEADER ── */
+.header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #e0e0d8;
+    padding-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.header h1 {
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.badge {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    display: inline-block;
+}
+.badge-green  { background: #d1fae5; color: #065f46; }
+.badge-blue   { background: #eff6ff; color: #1d4ed8; }
+.badge-amber  { background: #fef3c7; color: #92400e; }
+
+/* ── SECTION ── */
+.section {
+    margin-bottom: 2rem;
+}
+
+.section-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: #888;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+/* ── CARD ── */
+.card {
+    background: #fff;
+    border: 1px solid #e8e8e2;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* ── TABLE ── */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 500;
+    color: #888;
+    padding: 6px 10px;
+    border-bottom: 1px solid #e8e8e2;
+    background: #fafaf8;
+}
+
+td {
+    padding: 7px 10px;
+    border-bottom: 1px solid #f0f0ec;
+    font-size: 13px;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+tr:hover td {
+    background: #fafaf8;
+}
+
+/* ── RELAY TABLE INPUTS ── */
+.relay-table td {
+    padding: 5px 6px;
+}
+
+.relay-table input {
+    width: 100%;
+    border: 1px solid #e8e8e2;
+    border-radius: 4px;
+    padding: 4px 6px;
+    font-family: monospace;
+    font-size: 12px;
+    background: #fff;
+    color: #1a1a1a;
+    transition: border-color .15s;
+}
+
+.relay-table input:focus {
+    outline: none;
+    border-color: #aaa;
+}
+
+/* ── BUTTONS ── */
+.btn {
+    border: 1px solid #e8e8e2;
+    background: #fff;
+    color: #1a1a1a;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: monospace;
+    font-size: 11px;
+    transition: background .1s;
+}
+.btn:hover { background: #f0f0ec; }
+
+.btn-dark {
+    background: #1a1a1a;
+    color: #fff;
+    border-color: #1a1a1a;
+}
+.btn-dark:hover { background: #333; border-color: #333; }
+
+.btn-green {
+    background: #d1fae5;
+    color: #065f46;
+    border-color: #6ee7b7;
+}
+.btn-green:hover { background: #a7f3d0; }
+
+.btn-red {
+    background: #fff;
+    color: #991b1b;
+    border-color: #fecaca;
+}
+.btn-red:hover { background: #fee2e2; }
+
+/* ── STYLE PANEL ── */
+.style-panel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+    padding: 10px 14px;
+    background: #fff;
+    border: 1px solid #e8e8e2;
+    border-radius: 8px;
+}
+
+.style-label {
+    font-size: 11px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-right: 4px;
+}
+
+#current-style {
+    font-size: 12px;
+    font-weight: 500;
+    color: #1a1a1a;
+    margin-right: 12px;
+}
+
+.style-divider {
+    width: 1px;
+    height: 16px;
+    background: #e8e8e2;
+    margin: 0 4px;
+}
+
+/* ── SAVE ROW ── */
+.save-row {
+    margin-top: 10px;
+}
+
+/* ── CARDS ── */
+.card-grid {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.card {
+    width: 400px;
+    background: #fff;
+    border: 1px solid #e8e8e2;
+    border-radius: 8px;
+    padding: 1.25rem 1.25rem 1rem;
+    cursor: pointer;
+    transition: border-color .15s, box-shadow .15s;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.card:hover {
+    border-color: #aaa;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+}
+
+.card-path {
+    font-size: 15px;
+    font-weight: 500;
+    color: #1a1a1a;
+    margin-bottom: 6px;
+}
+
+.card-desc {
+    font-size: 11px;
+    color: #888;
+}
+
+.card-arrow {
+    font-size: 11px;
+    color: #ccc;
+    margin-top: 1.5rem;
+}

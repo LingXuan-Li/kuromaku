@@ -50,6 +50,42 @@ h1 {
     margin-bottom: 8px;
 }
 
+.card-a {
+    width: 400px;
+    background: #fff;
+    border: 1px solid #e8e8e2;
+    border-radius: 8px;
+    padding: 1.25rem 1.25rem 1rem;
+    cursor: pointer;
+    transition: border-color .15s, box-shadow .15s;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.card-a:hover {
+    border-color: #aaa;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+}
+
+.card-path {
+    font-size: 15px;
+    font-weight: 500;
+    color: #1a1a1a;
+    margin-bottom: 6px;
+}
+
+.card-desc {
+    font-size: 11px;
+    color: #888;
+}
+
+.card-arrow {
+    font-size: 11px;
+    color: #ccc;
+    margin-top: 1.5rem;
+}
+
 /* カード */
 .card {
     background: #fff;
