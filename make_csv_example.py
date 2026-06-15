@@ -53,6 +53,8 @@ csv_files = {
     ]
 }
 
+created_count = 0
+
 # CSVを順番に作成
 for filename, rows in csv_files.items():
     file_path = os.path.join("data", filename)
@@ -67,4 +69,15 @@ for filename, rows in csv_files.items():
         writer = csv.writer(f)
         writer.writerows(rows)
 
+    created_count += 1
     print("作成:", file_path)
+
+# 全CSVが作成された場合のみ data.db を削除
+if created_count == len(csv_files):
+    db_path = os.path.join("data", "data.db")
+
+    if os.path.exists(db_path):
+        os.remove(db_path)
+        print("削除:", db_path)
+    else:
+        print("data.db は存在しません")
