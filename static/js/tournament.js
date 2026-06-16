@@ -1,24 +1,9 @@
 const BOX_POS = {
-	R1L: {
-		x: 40,
-		y: 200
-	},
-	R1C: {
-		x: 200,
-		y: 200
-	},
-	R1R: {
-		x: 360,
-		y: 200
-	},
-	SF1: {
-		x: (40 + 200) / 2,
-		y: 110
-	},
-	Final: {
-		x: ((40 + 200) / 2 + 360) / 2,
-		y: 20
-	}
+	R1L: { x: 40, y: 200 },
+	R1C: { x: 200, y: 200 },
+	R1R: { x: 360, y: 200 },
+	SF1: { x: (40 + 200) / 2, y: 110 },
+	Final: { x: ((40 + 200) / 2 + 360) / 2, y: 20 }
 };
 
 function isEliminated(tNum, seed) {
@@ -34,14 +19,6 @@ function findActiveMatch(tNum, seed) {
 	return null;
 }
 
-function findActiveMatch(tNum, seed) {
-	for (const [id, m] of Object.entries(S.tournaments[tNum].matches)) {
-		if (!m.winner && m.team1 && m.team2 && (m.team1.seed === seed || m.team2.seed === seed)) {
-			return id;
-		}
-	}
-	return null;
-}
 /* ═══════════════ HISTORY ═══════════════ */
 function pushHistory() {
 	S.history.push(structuredClone({
@@ -63,19 +40,7 @@ function undo() {
 	S.dirty = true;
 	render();
 }
-/* ═══════════════ BRACKET LOGIC ═══════════════ */
-function isEliminated(tNum, seed) {
-	return Object.values(S.tournaments[tNum].matches).some(m => m.winner && m.winner.seed !== seed && (m.team1?.seed === seed || m.team2?.seed === seed));
-}
 
-function findActiveMatch(tNum, seed) {
-	for (const [id, m] of Object.entries(S.tournaments[tNum].matches)) {
-		if (!m.winner && m.team1 && m.team2 && (m.team1.seed === seed || m.team2.seed === seed)) {
-			return id;
-		}
-	}
-	return null;
-}
 /* ═══════════════ PREPARING MATCHES ═══════════════ */
 function addPreparingMatch() {
 	pushHistory();
@@ -94,7 +59,6 @@ function addPreparingMatch() {
 function removePreparingMatch(id) {
 	pushHistory();
 	delete S.preparingMatches[id];
-	// スケジュールからも削除
 	S.schedule = S.schedule.filter(s => !(s.tNum === 'preparing' && s.matchId === id));
 	S.dirty = true;
 	render();
@@ -103,11 +67,7 @@ function removePreparingMatch(id) {
 /* ═══════════════ SCHEDULE CORE ═══════════════ */
 function addToSchedule(tNum, matchId, col, beforeUid) {
 	pushHistory();
-	
-	if (tNum !== 'preparing') {
-		if (S.schedule.find(s => s.tNum === tNum && s.matchId === matchId)) return;
-	}
-	
+	if (S.schedule.find(s => s.tNum === tNum && s.matchId === matchId)) return;
 	S.dirty = true;
 	const colItems = S.schedule.filter(s => s.col === col).sort((a, b) => a.order - b.order);
 	let insertIdx = colItems.length;
@@ -123,7 +83,6 @@ function addToSchedule(tNum, matchId, col, beforeUid) {
 		order: insertIdx + 0.5,
 		status: 'pending'
 	});
-	// 再整列
 	S.schedule.filter(s => s.col === col).sort((a, b) => a.order - b.order).forEach((s, i) => s.order = i);
 	render();
 }
@@ -154,8 +113,7 @@ function setStatus(uid, status) {
 	pushHistory();
 	const item = S.schedule.find(s => s.uid === uid);
 	if (!item) return;
-	const sameCol = S.schedule.filter(s => s.col === item.col).sort((a, b) => a.order - b.order); // 上→下
-	// currentが選ばれたときだけ特別処理
+	const sameCol = S.schedule.filter(s => s.col === item.col).sort((a, b) => a.order - b.order);
 	if (status === 'current') {
 		let passed = false;
 		for (const s of sameCol) {
@@ -163,63 +121,80 @@ function setStatus(uid, status) {
 				s.status = 'current';
 				passed = true;
 			} else if (!passed) {
-				// 上側 → 終了扱い
 				s.status = 'done';
 			} else {
-				// 下側 → 未
 				s.status = 'pending';
 			}
 		}
 	} else {
-		// 通常更新（current以外はそのまま）
 		item.status = status;
 	}
 	S.dirty = true;
 	render();
 }
+
 /* ═══════════════ DATA & STATE ═══════════════ */
-let DATA = []; // teams
-let PROGRESS = []; // 追加
+let DATA = []; 
+let PROGRESS = []; 
 let _uid = 0;
 const newUid = () => 'u' + (++_uid);
 const S = {
 	currentTournament: 1,
-	currentView: 'tournament', // 'tournament' または 'preparing'
+	currentView: 'tournament', 
 	tournaments: {},
 	preparingMatches: {},
 	schedule: [],
 	history: [],
 	dirty: false,
 };
+
 /* ═══════════════ API ACTIONS ═══════════════ */
 async function fetchInitialData() {
+	console.log("[LOG] API '/api/tournaments_data' から初期データを取得します...");
 	try {
 		const res = await fetch('/api/tournaments_data');
 		if (!res.ok) throw new Error('データ取得失敗');
 		const json = await res.json();
+		console.log("[LOG] サーバーから取得した生のJSONデータ:", json);
+
 		DATA = json.teams || [];
 		PROGRESS = json.progress || [];
+		
 		S.schedule = (json.schedule || []).map((s, i) => ({
 			uid: newUid(),
-			tNum: s.tournament_number,
+			tNum: s.tournament_number === 0 ? 'preparing' : s.tournament_number,
 			matchId: s.match_id,
 			col: s.col,
 			order: s.row,
 			status: s.status || 'pending'
 		}));
-		// トーナメント初期化
+
+		// 準備中の試合データの器をスケジュールから復元
+		S.schedule.forEach(s => {
+			if (s.tNum === 'preparing' && !S.preparingMatches[s.matchId]) {
+				S.preparingMatches[s.matchId] = {
+					id: s.matchId,
+					label: '準備中',
+					team1: null,
+					team2: null,
+					winner: null
+				};
+			}
+		});
+
 		getTNums().forEach(num => {
 			S.tournaments[num] = initTournament(num);
 		});
-		// 進行データ反映
+
 		applyProgress();
 		render();
+		console.log("[LOG] 初期データの読み込みと初期描画が完了しました。");
 	} catch (err) {
-		console.error(err);
+		console.error("[CRITICAL ERROR]", err);
 		alert('データの読み込みに失敗しました。');
 	}
 }
-/* ═══════════════ PROGRESS適用 ═══════════════ */
+
 function applyProgress() {
 	PROGRESS.forEach(p => {
 		const t = S.tournaments[p.tournament_number];
@@ -233,10 +208,9 @@ function applyProgress() {
 		}
 	});
 }
-/* ═══════════════ SAVE ═══════════════ */
+
 async function save() {
 	const courtNames = ['A', 'B', 'C'];
-	// schedule
 	const schedulePayload = S.schedule.map(s => {
 		let m;
 		if (s.tNum === 'preparing') {
@@ -245,27 +219,20 @@ async function save() {
 			const t = S.tournaments[s.tNum];
 			m = t?.matches[s.matchId];
 		}
-
-		const isPrep = s.tNum === 'preparing';
-		const teamXName = isPrep ? '---' : (m?.team1?.team_name || '---');
-		const teamYName = isPrep ? '---' : (m?.team2?.team_name || '---');
-
 		return {
-			// NOT NULL エラー対策（準備中は 0、それ以外は数値に変換）
-			tournament_number: isPrep ? 0 : Number(s.tNum), 
+			tournament_number: s.tNum === 'preparing' ? 0 : Number(s.tNum),
 			match_id: s.matchId,
 			field: courtNames[s.col] + 'コート',
 			label: m?.label || '準備中',
-			team_x: teamXName,
-			team_y: teamYName,
-			game: isPrep ? '準備中' : (S.tournaments[s.tNum]?.gameName || ''),
+			team_x: m?.team1?.team_name || '---',
+			team_y: m?.team2?.team_name || '---',
+			game: s.tNum === 'preparing' ? '準備中' : (S.tournaments[s.tNum]?.gameName || ''),
 			col: s.col,
 			row: Math.floor(s.order),
 			status: s.status
 		};
 	});
 
-	// progress
 	const progressPayload = [];
 	Object.entries(S.tournaments).forEach(([tNum, t]) => {
 		Object.values(t.matches).forEach(m => {
@@ -278,16 +245,12 @@ async function save() {
 			}
 		});
 	});
+
 	try {
 		const res = await fetch('/api/save_match', {
 			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({
-				schedule: schedulePayload,
-				progress: progressPayload
-			})
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ schedule: schedulePayload, progress: progressPayload })
 		});
 		const text = await res.text();
 		if (!res.ok) {
@@ -296,7 +259,8 @@ async function save() {
 		}
 		alert('保存が完了しました。');
 		S.dirty = false;
-		document.getElementById('dirtyBanner').classList.remove('show');
+		const db = document.getElementById('dirtyBanner');
+		if (db) db.classList.remove('show');
 	} catch (err) {
 		console.error(err);
 		alert('保存に失敗しました。\n' + err.message);
@@ -315,15 +279,14 @@ function setWinner(tNum, matchId, seed) {
 	S.dirty = true;
 	render();
 }
-/* ═══════════════ BRACKET LOGIC ═══════════════ */
+
 function propagate(t) {
-	// 準決勝
 	t.matches.SF1.team1 = t.matches.R1L.winner || null;
 	t.matches.SF1.team2 = t.matches.R1C.winner || null;
-	// 決勝
 	t.matches.Final.team1 = t.matches.SF1.winner || null;
 	t.matches.Final.team2 = t.matches.R1R.winner || null;
 }
+
 /* ═══════════════ RENDER ═══════════════ */
 function el(tag, cls) {
 	const e = document.createElement(tag);
@@ -332,7 +295,7 @@ function el(tag, cls) {
 }
 
 function render() {
-	if (DATA.length === 0) return; // データ未取得時は描画しない
+	if (DATA.length === 0) return; 
 	renderTournament();
 	renderCourt();
 	const db = document.getElementById('dirtyBanner');
@@ -341,10 +304,10 @@ function render() {
 
 function renderTournament() {
 	const panel = document.getElementById('tourn-panel');
+	if (!panel) return;
 	panel.innerHTML = '';
 	const tabs = el('div', 'tabs');
 	
-	// トーナメントタブ
 	getTNums().forEach(num => {
 		const gn = DATA.find(d => d.tournament_number === num)?.game_name ?? '';
 		const isActive = S.currentView === 'tournament' && num === S.currentTournament;
@@ -358,7 +321,6 @@ function renderTournament() {
 		tabs.appendChild(btn);
 	});
 
-	// 準備中タブ
 	const prepBtn = el('button', 'tab' + (S.currentView === 'preparing' ? ' active' : ''));
 	prepBtn.textContent = '準備中';
 	prepBtn.onclick = () => {
@@ -366,10 +328,8 @@ function renderTournament() {
 		render();
 	};
 	tabs.appendChild(prepBtn);
-
 	panel.appendChild(tabs);
 
-	// コンテンツ描画
 	if (S.currentView === 'preparing') {
 		renderPreparingMatches(panel);
 	} else {
@@ -518,47 +478,61 @@ function renderBracket(panel) {
 function renderPreparingMatches(panel) {
 	const container = el('div', 'preparing-container');
 	const header = el('div', 'preparing-header');
-	header.textContent = '下の「準備中」ボックスをコートへドラッグ＆ドロップしてください';
+	header.textContent = '準備中の試合を作成してドラッグしてください';
 	container.appendChild(header);
 
+	const btnWrap = el('div', 'preparing-btn-wrap');
+	const addBtn = el('button', 'action-btn');
+	addBtn.textContent = '+ 準備中マッチを追加';
+	addBtn.onclick = addPreparingMatch;
+	btnWrap.appendChild(addBtn);
+	container.appendChild(btnWrap);
+
 	const matchList = el('div', 'preparing-matches');
-	
-	const matchBox = el('div', 'match-box preparing-match');
-	matchBox.setAttribute('draggable', 'true');
-	
-	const lbl = el('div', 'mb-label');
-	const lblText = document.createElement('span');
-	lblText.textContent = '準備中';
-	lbl.appendChild(lblText);
-	matchBox.appendChild(lbl);
+	Object.values(S.preparingMatches).forEach(m => {
+		const matchBox = el('div', 'match-box preparing-match');
+		matchBox.setAttribute('draggable', 'true');
+		
+		const lbl = el('div', 'mb-label');
+		const lblText = document.createElement('span');
+		lblText.textContent = m.label;
+		lbl.appendChild(lblText);
+		matchBox.appendChild(lbl);
 
-	const t1 = el('div', 'mb-team');
-	t1.textContent = '---';
-	matchBox.appendChild(t1);
-	
-	const vs = el('div', 'mb-vs');
-	vs.textContent = 'vs';
-	matchBox.appendChild(vs);
-	
-	const t2 = el('div', 'mb-team');
-	t2.textContent = '---';
-	matchBox.appendChild(t2);
+		const t1 = el('div', 'mb-team');
+		t1.textContent = '---';
+		matchBox.appendChild(t1);
+		
+		const vs = el('div', 'mb-vs');
+		vs.textContent = 'vs';
+		matchBox.appendChild(vs);
+		
+		const t2 = el('div', 'mb-team');
+		t2.textContent = '---';
+		matchBox.appendChild(t2);
 
-	matchBox.addEventListener('dragstart', e => {
-		e.dataTransfer.setData('application/json', JSON.stringify({
-			type: 'bracket',
-			tNum: 'preparing_template', // これが右側にドロップされた時の合図になる
-			matchId: null
-		}));
+		const rmBtn = el('button', 'preparing-remove-btn');
+		rmBtn.textContent = '✕';
+		rmBtn.onclick = () => removePreparingMatch(m.id);
+		matchBox.appendChild(rmBtn);
+
+		matchBox.addEventListener('dragstart', e => {
+			e.dataTransfer.setData('application/json', JSON.stringify({
+				type: 'bracket',
+				tNum: 'preparing',
+				matchId: m.id
+			}));
+		});
+
+		matchList.appendChild(matchBox);
 	});
-
-	matchList.appendChild(matchBox);
 	container.appendChild(matchList);
 	panel.appendChild(container);
 }
 
 function renderCourt() {
 	const panel = document.getElementById('court-panel');
+	if (!panel) return;
 	panel.innerHTML = '';
 	const colWrap = el('div', 'court-columns');
 	['A', 'B', 'C'].forEach((name, ci) => {
@@ -594,33 +568,8 @@ function renderCourt() {
 					break;
 				}
 			}
-			
-			if (data.type === 'bracket') {
-				if (data.tNum === 'preparing_template') {
-					// 履歴を保存
-					pushHistory();
-					
-					// 新しいユニークなIDを生成 (例: prep_u1)
-					const newMatchId = 'prep_' + newUid();
-					
-					// ① 実際の試合データ(実体)をオブジェクトに追加
-					S.preparingMatches[newMatchId] = {
-						id: newMatchId,
-						label: '準備中',
-						team1: null,
-						team2: null,
-						winner: null
-					};
-					
-					// ② 作成した実体データを使って、コートのスケジュールに追加
-					addToSchedule('preparing', newMatchId, ci, beforeUid);
-				} else {
-					// 通常のトーナメント戦のドロップ（既存の処理）
-					addToSchedule(data.tNum, data.matchId, ci, beforeUid);
-				}
-			} else if (data.type === 'court') {
-				moveScheduleItem(data.uid, ci, beforeUid);
-			}
+			if (data.type === 'bracket') addToSchedule(data.tNum, data.matchId, ci, beforeUid);
+			else if (data.type === 'court') moveScheduleItem(data.uid, ci, beforeUid);
 		});
 		colWrap.appendChild(col);
 	});
@@ -699,6 +648,7 @@ function renderCourtItem(sItem, m) {
 	
 	return itemEl;
 }
+
 /* ═══════════════ INIT ═══════════════ */
 function getTNums() {
 	return [...new Set(DATA.map(d => d.tournament_number))].sort((a, b) => a - b);
@@ -712,43 +662,13 @@ function initTournament(num) {
 		bySeed,
 		gameName,
 		matches: {
-			R1L: {
-				id: 'R1L',
-				label: '1回戦',
-				team1: bySeed[1],
-				team2: bySeed[2],
-				winner: null
-			},
-			R1C: {
-				id: 'R1C',
-				label: '1回戦',
-				team1: bySeed[3],
-				team2: bySeed[4],
-				winner: null
-			},
-			R1R: {
-				id: 'R1R',
-				label: '1回戦',
-				team1: bySeed[5],
-				team2: bySeed[6],
-				winner: null
-			},
-			SF1: {
-				id: 'SF1',
-				label: '準決勝',
-				team1: null,
-				team2: null,
-				winner: null
-			},
-			Final: {
-				id: 'Final',
-				label: '決勝',
-				team1: null,
-				team2: null,
-				winner: null
-			},
+			R1L: { id: 'R1L', label: '1回戦', team1: bySeed[1], team2: bySeed[2], winner: null },
+			R1C: { id: 'R1C', label: '1回戦', team1: bySeed[3], team2: bySeed[4], winner: null },
+			R1R: { id: 'R1R', label: '1回戦', team1: bySeed[5], team2: bySeed[6], winner: null },
+			SF1: { id: 'SF1', label: '準決勝', team1: null, team2: null, winner: null },
+			Final: { id: 'Final', label: '決勝', team1: null, team2: null, winner: null },
 		}
 	};
 }
 
-fetchInitialData();
+document.addEventListener('DOMContentLoaded', fetchInitialData);
