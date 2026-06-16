@@ -44,10 +44,35 @@ function updateField(prefix, d) {
 setInterval(fetchDashboard, 3000); //毎3.0秒
 fetchDashboard();
 
+let prevJson = "";
+
+function clearClubRelay() {
+    document.getElementById("relay-club").textContent = "---";
+
+    for (let n = 1; n <= 6; n++) {
+        document.getElementById(`Re${n}-team`).textContent = "---";
+        document.getElementById(`Re${n}-1`).textContent = "---";
+        document.getElementById(`Re${n}-2`).textContent = "---";
+        document.getElementById(`Re${n}-3`).textContent = "---";
+        document.getElementById(`Re${n}-4`).textContent = "---";
+        document.getElementById(`Re${n}-5`).textContent = "---";
+        document.getElementById(`Re${n}-6`).textContent = "---";
+    }
+}
+
 async function loadClubRelay() {
     try {
         const res = await fetch("/api/relay_data");
         const data = await res.json();
+
+        const currentJson = JSON.stringify(data);
+
+        if (currentJson === prevJson) {
+            return; // 変更なし
+        }
+
+        prevJson = currentJson;
+        clearClubRelay();
 
         document.getElementById("relay-club").textContent =
             data.category_name || "---";
