@@ -289,6 +289,7 @@ def build_for_col(col_index):
         team_x = None
         team_y = None
         game = None
+        next_game = None
         nxt = dashboard_data[0] if len(dashboard_data) > 0 else None
         g = dashboard_data[1] if len(dashboard_data) > 1 else None
 
@@ -299,13 +300,21 @@ def build_for_col(col_index):
         game = current.get("game")
 
         nxt = dashboard_data[current_idx + 1] if current_idx + 1 < len(dashboard_data) else None
+
+        if not nxt:
+            next_game = None
+        elif nxt.get("team_x") == "---" and nxt.get("team_y") == "---":
+            next_game = "---"
+        else:
+            next_game = f'{nxt.get("team_x")} vs {nxt.get("team_y")}'
+
         g = dashboard_data[current_idx + 2] if current_idx + 2 < len(dashboard_data) else None
 
     return {
         "teamX": team_x,
         "teamY": team_y,
         "game": game,
-        "next": f'{nxt.get("team_x")} vs {nxt.get("team_y")}' if nxt else None,
+        "next": next_game,
         "next_game": nxt.get("game") if nxt else None,
         "gathering": f'{g.get("team_x")} ・ {g.get("team_y")}' if g else None
     }
