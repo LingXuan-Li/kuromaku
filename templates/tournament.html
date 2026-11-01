@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+	<meta charset="UTF-8">
+	<title>/tournaments_editor</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/tournament.css') }}">
+</head>
+
+<body>
+	<div class="header">
+		<h1>/tournaments_editor</h1>
+		<span class="badge">dev only</span>
+		<div id="dirtyBanner">UNSAVED DATA</div>
+		<div style="margin-left: auto;">
+			<button class="action-btn" id="undoBtn" onclick="undo()">UNDO</button>
+		</div>
+	</div>
+	<div id="main">
+		<div id="left-column">
+			<div class="section-label">tournament bracket</div>
+			<div id="tourn-panel">
+				<!-- JSで動的に生成 -->
+			</div>
+		</div>
+		<div id="right-column" style="flex: 1;">
+			<div class="section-label">court management</div>
+			<div id="court-panel">
+				<!-- JSで動的に生成 -->
+			</div>
+		</div>
+	</div>
+	<script src="{{ url_for('static', filename='js/sort_table.js') }}"></script>
+	<script src="{{ url_for('static', filename='js/tournament.js') }}"></script>
+</body>
+
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>/class_relay</title>
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/class_relay.css') }}">
+</head>
+
+<body>
+	<div class="header">
+		<h1>/class_relay</h1>
+		<span class="badge badge-green">dev only</span>
+	</div>
+	<div class="section">
+		<div class="section-label">Notice</div>
+		<p>テーブル上部: 1番レーン側</p>
+		<p>テーブル下部: 3番レーン側</p>
+	</div>
+	<div class="section">
+		<div class="section-label">Class Relay Race</div>
+		<div class="card">
+			<table class="relay-table">
+				<thead>
+					<tr>
+						<th class="drag-th"></th>
+						<th>team</th>
+						<th>1st</th>
+						<th>2nd</th>
+						<th>3rd</th>
+						<th>4th</th>
+						<th>5th</th>
+						<th>6th</th>
+						<th>7th</th>
+						<th>8th</th>
+						<th>9th</th>
+						<th>10th</th>
+					</tr>
+				</thead>
+				<tbody id="race-body"></tbody>
+			</table>
+		</div>
+		<div class="save-row">
+			<button class="btn btn-dark" onclick="saveRace()"> 保存 </button>
+		</div>
+	</div>
+	<script src="{{ url_for('static', filename='js/sort_table.js') }}"></script>
+	<script src="{{ url_for('static', filename='js/class_relay.js') }}"></script>
+</body>
+
+</html>

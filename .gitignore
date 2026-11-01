@@ -13,9 +13,9 @@ __pycache__/
 # VSCode Files
 .vscode/
 
-# SQLiteのデータベースファイル
-data/values.db
-data/data.db
+# データベースフォルダ内ファイル
+data/*
+!data/how_to_make_csv.md
 
 # フォントデータ
 static/css/font/*

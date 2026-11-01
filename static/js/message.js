@@ -44,8 +44,24 @@ function execCmd(type) {
         result = "$$" + selected + "$$";
     }
 
-    if (type === "orange") {
+    if (type === "blue") {
         result = "@@" + selected + "@@";
+    }
+
+    if (type === "newsflash") {
+        result = "【速報】" + selected;
+    }
+
+    if (type === "notice") {
+        result = "【お知らせ】" + selected;
+    }
+
+    if (type === "letter") {
+        result = "【おたより】" + selected;
+    }
+
+    if (type === "em-dash") {
+        result = "────" + selected;
     }
 
     editor.setRangeText(result, start, end, "end");

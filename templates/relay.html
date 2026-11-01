@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>/relay_editor</title>
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/club_relay.css') }}">
+</head>
+
+<body>
+	<div class="header">
+		<h1>/relay_editor</h1>
+		<span class="badge badge-green">dev only</span>
+	</div>
+	<!-- カテゴリー切替 -->
+	<div class="category-panel">
+		<span class="category-label">current</span>
+		<span id="current-category">読み込み中...</span>
+		<div class="category-divider"></div>
+		<button class="btn btn-green" onclick="saveCategory('culture')">文化部予選</button>
+		<button class="btn btn-green" onclick="saveCategory('sports')">運動部予選</button>
+		<button class="btn btn-green" onclick="saveCategory('relay')">本戦</button>
+	</div>
+	<div class="section">
+		<div class="section-label">Notice</div>
+		<p>テーブル上部: 1番レーン側</p>
+		<p>テーブル下部: 6番レーン側</p>
+	</div>
+	<!-- 文化部 -->
+	<div class="section">
+		<div class="section-label">Culture Club</div>
+		<div class="card">
+			<table class="relay-table">
+				<thead>
+					<tr>
+						<th>id</th>
+						<th>team</th>
+						<th>1st</th>
+						<th>2nd</th>
+						<th>3rd</th>
+						<th>4th</th>
+						<th>5th</th>
+						<th>6th</th>
+						<th>add</th>
+					</tr>
+				</thead>
+				<tbody id="culture-body"></tbody>
+			</table>
+		</div>
+		<div class="save-row">
+			<button class="btn btn-dark" onclick="saveCulture()"> Culture保存 </button>
+		</div>
+	</div>
+	<!-- 運動部 -->
+	<div class="section">
+		<div class="section-label">Sports Club</div>
+		<div class="card">
+			<table class="relay-table">
+				<thead>
+					<tr>
+						<th>id</th>
+						<th>team</th>
+						<th>1st</th>
+						<th>2nd</th>
+						<th>3rd</th>
+						<th>4th</th>
+						<th>5th</th>
+						<th>6th</th>
+						<th>add</th>
+					</tr>
+				</thead>
+				<tbody id="sports-body"></tbody>
+			</table>
+		</div>
+		<div class="save-row">
+			<button class="btn btn-dark" onclick="saveSports()"> Sports保存 </button>
+		</div>
+	</div>
+	<!-- Final Relay -->
+	<div class="section">
+		<div class="section-label">Final Relay</div>
+		<div class="card">
+			<table class="relay-table">
+				<thead>
+					<tr>
+						<th class="drag-th"></th>
+						<th>team</th>
+						<th>1st</th>
+						<th>2nd</th>
+						<th>3rd</th>
+						<th>4th</th>
+						<th>5th</th>
+						<th>6th</th>
+						<th>delete</th>
+					</tr>
+				</thead>
+				<tbody id="relay-body"></tbody>
+			</table>
+		</div>
+		<div class="save-row">
+			<button class="btn btn-dark" onclick="saveRelay()">Final Relay保存</button>
+		</div>
+	</div>
+	<script src="{{ url_for('static', filename='js/sort_table.js') }}"></script>
+	<script src="{{ url_for('static', filename='js/club_relay.js') }}"></script>
+</body>
+
+</html>

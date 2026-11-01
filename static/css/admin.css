@@ -1,46 +1,132 @@
-:root {
-	--primary: #6B9CFF;
-	--background: #f8f6f0;
-	--surface: #ffffff;
-	--text: #333333;
-	--border: #e0e0e0;
+/* リセット */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
+/* 全体 */
 body {
-	background-color: var(--background);
-	color: var(--text);
-	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-	padding: 40px;
+    font-family: monospace;
+    background: #f5f5f2;
+    color: #1a1a1a;
+    padding: 2rem;
+}
+
+/* ヘッダー */
+.header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #e0e0d8;
+    padding-bottom: 1rem;
 }
 
 h1 {
-	color: var(--primary);
-	margin-bottom: 20px;
+    font-size: 18px;
+    font-weight: 500;
 }
 
-ul {
-	list-style: none;
-	padding: 0;
+.badge {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: #d1fae5;
+    color: #065f46;
 }
 
-li {
-	margin-bottom: 12px;
+/* セクション */
+.section {
+    margin-bottom: 1.5rem;
 }
 
-a.button {
-	display: block;
-	text-decoration: none;
-	background-color: var(--surface);
-	color: var(--text);
-	padding: 12px 16px;
-	border-radius: 8px;
-	border: 1px solid var(--border);
-	transition: all 0.2s ease;
+.section-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: #888;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
 }
 
-a.button:hover {
-	background-color: var(--primary);
-	color: white;
-	border-color: var(--primary);
-	transform: translateY(-2px);
+.card-a {
+    width: 400px;
+    background: #fff;
+    border: 1px solid #e8e8e2;
+    border-radius: 8px;
+    padding: 1.25rem 1.25rem 1rem;
+    cursor: pointer;
+    transition: border-color .15s, box-shadow .15s;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.card-a:hover {
+    border-color: #aaa;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+}
+
+.card-path {
+    font-size: 15px;
+    font-weight: 500;
+    color: #1a1a1a;
+    margin-bottom: 6px;
+}
+
+.card-desc {
+    font-size: 11px;
+    color: #888;
+}
+
+.card-arrow {
+    font-size: 11px;
+    color: #ccc;
+    margin-top: 1.5rem;
+}
+
+/* カード */
+.card {
+    background: #fff;
+    border: 1px solid #e8e8e2;
+    border-radius: 8px;
+    padding: 0;
+    overflow: hidden;
+}
+
+/* リストアイテム */
+.route-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    font-size: 13px;
+    text-decoration: none;
+    color: inherit;
+    border-bottom: 1px solid #f0f0ec;
+}
+
+.route-item:last-child {
+    border-bottom: none;
+}
+
+.route-item:hover {
+    background: #fafaf8;
+}
+
+/* ピル */
+.pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.pill code {
+    font-family: monospace;
 }

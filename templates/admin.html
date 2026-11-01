@@ -3,18 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Routes</title>
+    <title>/admin</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
 </head>
 <body>
-    <h1>Registered Routes</h1>
-    <ul>
-    {% for route in routes %}
-    {% set parts = route.split(" → ") %}
-    <li>
-        <a class="button" href="{{ parts[1] }}">{{ parts[0] }} → {{ parts[1] }}</a>
-    </li>
-    {% endfor %}
-    </ul>
+    <div class="header">
+        <h1>/admin</h1>
+        <span class="badge">dev only</span>
+    </div>
+
+    <div class="section">
+        <span class="section-label">Page Change Guide</span>
+            <div class="card-grid">
+            <a href="/page_changer" target="_blank" rel="noopener noreferrer" class="card-a">
+            <div class="card-path">/page_changer (表示頁編集画面)</div>
+            <div class="card-desc">表示頁編集画面を新しいタブで開く</div>
+
+            <div class="card-arrow">↗ OPEN IN NEW TAB</div>
+        </a>
+    </div>
+    <div class="section">
+        <div class="section-label">routes</div>
+        <div class="card">
+            {% for route in routes %}
+                {% set parts = route.split(" → ") %}
+                <a class="route-item" href="{{ parts[1] }}">
+                    <span>{{ parts[0] }}</span>
+                    <div class="pill">
+                        <code>{{ parts[1] }}</code>
+                        <span>→</span>
+                    </div>
+                </a>
+            {% else %}
+                <div class="route-item" style="color:#aaa; justify-content:center;">
+                    （ルートがありません）
+                </div>
+            {% endfor %}
+        </div>
+    </div>
 </body>
 </html>

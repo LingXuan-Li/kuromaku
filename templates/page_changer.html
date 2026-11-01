@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>/page_changer</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/page_changer.css') }}">
+</head>
+<body>
+
+<div class="header">
+    <h1>/page_changer</h1>
+    <span class="badge badge-green">dev only</span>
+</div>
+
+<div class="section">
+    <span class="section-label">Information</span>
+    <p>Page Styleセクションでページスタイルを変更すると、Current Guideセクションに表示中の案内編集ページへの遷移ボタン(別タブ)が開きます。</p>
+</div>
+
+<!-- 頁スタイル切替 -->
+<div class="style-panel">
+    <span class="style-label">Page Style</span>
+    <span id="current-style">読み込み中...</span>
+    <div class="style-divider"></div>
+    <button class="btn btn-green" onclick="savePageStyle('opening')">開会式</button>
+    <button class="btn btn-green" onclick="savePageStyle('1G-game')">1学年競技（玉入れ）</button>
+    <button class="btn btn-green" onclick="savePageStyle('2G-game')">2学年競技（ムカデ競争）</button>
+    <button class="btn btn-green" onclick="savePageStyle('3G-game')">3学年競技（中当て）</button>
+    <button class="btn btn-green" onclick="savePageStyle('4G-game')">4学年競技（台風の目）</button>
+    <button class="btn btn-green" onclick="savePageStyle('5G-game')">5学年競技（綱引き）</button>
+    <button class="btn btn-green" onclick="savePageStyle('jump')">大縄跳び</button>
+    <button class="btn btn-green" onclick="savePageStyle('lunch')">昼休憩</button>
+    <button class="btn btn-green" onclick="savePageStyle('tournament')">トーナメント</button>
+    <button class="btn btn-green" onclick="savePageStyle('club_relay')">部活対抗リレー</button>
+    <button class="btn btn-green" onclick="savePageStyle('class_relay')">選抜リレー</button>
+    <button class="btn btn-green" onclick="savePageStyle('closing')">閉会式</button>
+</div>
+
+<div class="section">
+    <span class="section-label">Current Guide</span>
+    <div id="card-guide"></div>
+</div>
+
+<div class="section">
+    <span class="style-label">Editors Route</span>
+
+    <div class="card-grid">
+    <a href="/tournaments_editor" target="_blank" rel="noopener noreferrer" class="card">
+        <div class="card-path">/tournaments_editor (トーナメント)</div>
+        <div class="card-desc">トーナメント編集画面を新しいタブで開く</div>
+
+        <div class="card-arrow">↗ OPEN IN NEW TAB</div>
+    </a>
+
+    <a href="/relay_editor" target="_blank" rel="noopener noreferrer" class="card">
+        <div class="card-path">/relay_editor (部活対抗リレー)</div>
+        <div class="card-desc">部活対抗リレー編集画面を新しいタブで開く</div>
+
+        <div class="card-arrow">↗ OPEN IN NEW TAB</div>
+    </a>
+
+    <a href="/class_relay" target="_blank" rel="noopener noreferrer" class="card">
+        <div class="card-path">/class_relay (選抜リレー)</div>
+        <div class="card-desc">選抜リレー編集画面を新しいタブで開く</div>
+
+        <div class="card-arrow">↗ OPEN IN NEW TAB</div>
+    </a>
+
+    <a href="/admin" target="_blank" rel="noopener noreferrer" class="card">
+        <div class="card-path">/admin (管理者画面・リンク集)</div>
+        <div class="card-desc">管理者画面を新しいタブで開く</div>
+
+        <div class="card-arrow">↗ OPEN IN NEW TAB</div>
+    </a>
+
+    <a href="/message" target="_blank" rel="noopener noreferrer" class="card">
+        <div class="card-path">/message (メッセージエディタ)</div>
+        <div class="card-desc">メッセージ編集画面を新しいタブで開く</div>
+
+        <div class="card-arrow">↗ OPEN IN NEW TAB</div>
+    </a>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/page_changer.js') }}"></script>
+</body>
+</html>
